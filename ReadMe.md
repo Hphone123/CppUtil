@@ -4,10 +4,10 @@ A hobby project implementing some utility functions and classes in c++.
 
 ## Whats even in here (and what is planned)
 
-- [ ] Arrays
-  - [ ] Array
-  - [ ] ResizableArray
-  - [ ] DynamicArray
+- [x] Arrays
+  - [x] Array
+  - [x] ResizableArray
+  - [x] DynamicArray
 - [ ] Iterations
   - [ ] Iterator
   - [ ] Iteratable
