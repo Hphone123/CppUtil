@@ -1,0 +1,16 @@
+# Build Files
+
+## CMake Files
+CMakeFiles
+*.cmake
+CMakeCache.txt
+compile_commands.json
+
+## Makefile Files
+Makefile
+Testing
+tests
+*.a
+
+# Dart Config (Fro some reason)
+*.tcl
