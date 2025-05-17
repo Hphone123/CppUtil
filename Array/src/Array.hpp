@@ -155,7 +155,7 @@ public:
   {
     if (newSize < 1)
     {
-      throw out_of_range("Size " + to_string(newSize) + " is not a valid array size!");
+      throw length_error("Size " + to_string(newSize) + " is not a valid array size!");
     }
     
     if (newSize >= this->size)

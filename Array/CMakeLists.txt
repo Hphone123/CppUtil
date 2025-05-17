@@ -13,7 +13,7 @@ endif(NOT MSVC)
 
 find_package(Catch2 REQUIRED)
 
-add_library(array STATIC Array.hpp)
+add_library(array STATIC src/Array.hpp)
 set_target_properties(array PROPERTIES LINKER_LANGUAGE CXX)
 
 add_executable(tests test/ArrayTest.cpp)
