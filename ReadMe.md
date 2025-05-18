@@ -16,6 +16,7 @@ A hobby project implementing some utility functions and classes in c++.
   - [ ] Single-Linked List
   - [ ] Double-Linked List
   - [ ] Ring
+- [ ] Maps
 - [ ] Tree
   - [ ] DTree
   - [ ] N-Node Tree

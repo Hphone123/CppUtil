@@ -13,12 +13,22 @@ endif(NOT MSVC)
 
 find_package(Catch2 REQUIRED)
 
-add_library(array STATIC src/Array.hpp)
-set_target_properties(array PROPERTIES LINKER_LANGUAGE CXX)
+add_library(Array 
+	STATIC 
+		src/Array.hpp)
 
-add_executable(tests test/ArrayTest.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+set_target_properties(Array 
+	PROPERTIES 
+		LINKER_LANGUAGE CXX)
+
+target_include_directories(Array 
+	PUBLIC 
+		${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+add_executable(ArrayTest 
+	test/ArrayTest.cpp)
+target_link_libraries(ArrayTest PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 include(Catch)
-catch_discover_tests(tests)
+catch_discover_tests(ArrayTest)
