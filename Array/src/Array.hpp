@@ -97,6 +97,11 @@ public:
       throw out_of_range("Index " + to_string(idx) + " out of bounds for array of size " + to_string(this->size) + "!");
     }
   }
+
+  int getSize()
+  {
+    return this->size;
+  }
 };
 
 template <typename T> class ResizableArray : public Array<T>
@@ -245,6 +250,11 @@ public:
 
     this->arr[idx++] = item; 
     
+  }
+
+  int getCount()
+  {
+    return this->idx;
   }
   
   void add(T item, int idx)

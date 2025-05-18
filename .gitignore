@@ -9,7 +9,7 @@ compile_commands.json
 ## Makefile Files
 Makefile
 Testing
-tests
+**/*Test
 *.a
 
 # Dart Config (Fro some reason)
