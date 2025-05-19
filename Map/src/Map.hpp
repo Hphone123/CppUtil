@@ -1,8 +1,11 @@
+#include <initializer_list>
+#include <utility> // for std::pair
+
 #include "Array.hpp"
 #include "Exception.hpp"
 
 /**
- * Maps key elements U to key T
+ * Maps item U to unique key T
  */
 template<typename T, typename U> class Map
 {
@@ -12,6 +15,13 @@ private:
 
 public:
   Map() : t(), u() {}
+
+  Map(std::initializer_list<std::pair<const T, U>> list) {
+    for (const auto& item : list) {
+      t.add(item.first);
+      u.add(item.second);
+    }
+  } 
 
   /**
    * Get item U correspinding to `key`

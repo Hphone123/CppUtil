@@ -57,3 +57,20 @@ TEST_CASE("Get / Set / Remove item", "[non_add_operation]")
     REQUIRE(m.tryGetItem("1") == "5");
   }());
 }
+
+TEST_CASE("Map gan be initialized with initializer list", "[initialize]")
+{
+  REQUIRE_NOTHROW([&](){
+
+    Map<std::string, double> m 
+    {
+      {"1,1", 1.1},
+      {"1,2", 1.2},
+      {"1,3", 1.3}
+    };
+
+    REQUIRE(m["1,1"] == 1.1);
+    REQUIRE(m["1,2"] == 1.2);
+    REQUIRE(m["1,3"] == 1.3);
+  }());
+};
