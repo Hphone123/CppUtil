@@ -28,6 +28,28 @@ TEST_CASE("Test Array", "[array]")
     REQUIRE_THROWS_AS(x = a[11], std::out_of_range);
     REQUIRE_THROWS_AS(a[-1] = 1, std::out_of_range);
   }
+
+  SECTION("Array can be initialized with existing pointer", "[init]")
+  {
+    #define FÜNNÜF 5
+    int * ptr = new int[FÜNNÜF];
+    REQUIRE_NOTHROW([&]() 
+    {
+      auto arr = Array<int>(ptr, FÜNNÜF);
+      delete [] ptr;
+    }());
+  }
+
+  SECTION("Array pointers can be accessed via cast operator", "[cast]")
+  {
+    auto arr = Array<int>(20);
+    REQUIRE_NOTHROW([&]()
+    {
+      int * ptr = arr;
+      ptr[19] = 100;
+      REQUIRE(arr[19] == 100);
+    }());
+  }
 }
 
 TEST_CASE("Test ResizableArray", "[resizable_array]")
