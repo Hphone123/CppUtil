@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdexcept>
-#include <string.h>
 
 using namespace std;
 
@@ -25,6 +24,26 @@ public:
     }
 
     this->arr  = new T[size]();
+    this->size = size;
+  }
+
+  Array<T>(T * buf, int size)
+  {
+    if (size < 1)
+    {
+      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+    }
+
+    if (buf == nullptr)
+    {
+      throw invalid_argument("Buffer must not be a nullpointer!");
+    }
+
+    this->arr  = new T[size]();
+    for (int i = 0; i < size; i++)
+    {
+      this->arr[i] = buf[i];
+    }
     this->size = size;
   }
 
@@ -57,6 +76,11 @@ public:
     }
 
     return *this;
+  }
+
+  operator T * ()
+  {
+    return this->arr;
   }
 
   ~Array<T>()
