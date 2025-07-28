@@ -4,6 +4,9 @@
 #include <functional>
 #include "Exception.hpp"
 
+// Hope a billion is enough elements you sick people
+#define ARRAY_MAX_SIZE 1'000'000'000
+
 
 using namespace std;
 
@@ -21,7 +24,7 @@ public:
 
   Array<T>(size_t size)
   {
-    if (size < 1)
+    if (size > ARRAY_MAX_SIZE)
     {
       throw length_error("Size " + to_string(size) + " is not a valid array size!");
     }
@@ -32,7 +35,7 @@ public:
 
   Array<T>(const T * buf, size_t size)
   {
-    if (size < 1)
+    if (size > ARRAY_MAX_SIZE)
     {
       throw length_error("Size" + to_string(size) + " is not a valid array size!");
     }
@@ -81,7 +84,7 @@ public:
     return *this;
   }
 
-  operator T * ()
+  operator T * () const
   {
     return this->arr;
   }
@@ -130,10 +133,15 @@ public:
     return this->size;
   }
 
-  Array<size_t> find(T el);
+  bool isEmpty() const
+  {
+    return (this->size == 0);
+  }
+
+  Array<size_t> find(T el) const;
 
   //ToDo: UnitTest
-  bool operator== (Array<T>& other)
+  bool operator== (const Array<T>& other) const
   {
     if (this->size != other.size)
       return false;
@@ -145,13 +153,81 @@ public:
     return true;
   }
 
+  bool operator!=(const Array<T>& other) const
+  {
+    return !(this->operator==(other));
+  }
+
   template<typename func>
-  void foreach(func&& f)
+  void foreach(const func&& f)
   {
     for (int i = 0; i < this->getSize(); i++)
     {
-      f(this->operator[](i));
+      if constexpr (std::is_invocable_v<func, T&>)
+      {
+        f(this->operator[](i));
+      }
+      else if constexpr (std::is_invocable_v<func, T&, size_t>)
+      {
+        f(this->operator[](i), i);
+      }
+      else
+      {
+        static_assert(std::is_invocable_v<func, T&> || 
+                      std::is_invocable_v<func, T&, size_t>, 
+                        "Function must have signature 'void(T&)' or 'void(T&, size_t)'!");
+      }
     }
+  }
+  
+  template<typename func>
+  bool all(const func&& f)
+  {
+    for (int i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, T&>)
+      {
+        if (!f(this->operator[](i))) 
+          return false;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, T&, size_t>)
+      {
+        if (!f(this->operator[](i), i)) 
+          return false;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, T&> || 
+                      std::is_invocable_r_v<bool, func, T&, size_t>, 
+                        "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }
+    }
+    return true;
+  }
+  
+  template<typename func>
+  bool any(const func&& f)
+  {
+    for (int i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, T&>)
+      {
+        if (f(this->operator[](i))) 
+          return true;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, T&, size_t>)
+      {
+        if (f(this->operator[](i), i)) 
+          return true;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, T&> || 
+                      std::is_invocable_r_v<bool, func, T&, size_t>, 
+                        "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }
+    }
+    return false;
   }
 };
 
@@ -431,7 +507,7 @@ public:
  ******************************************************/
 
 //ToDo: Unit Test
-template <typename T> Array<size_t> Array<T>::find(T el)
+template <typename T> Array<size_t> Array<T>::find(T el) const
 {
   DynamicArray<size_t> res;
   for (size_t i = 0; i < this->size; i++)
