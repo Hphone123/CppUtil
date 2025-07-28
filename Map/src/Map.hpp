@@ -1,3 +1,5 @@
+#pragma once
+
 #include <initializer_list>
 #include <utility> // for std::pair
 

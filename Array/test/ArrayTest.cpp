@@ -242,6 +242,6 @@ TEST_CASE("Array Loop", "[array][loop]")
 
   SECTION("All will return false if the function is false for any element")
   {
-    REQUIRE(arr.all([](int& x){return x < 5;}));
+    REQUIRE(!arr.all([](int& x){return x < 5;}));
   }
 }

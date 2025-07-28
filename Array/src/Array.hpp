@@ -139,7 +139,7 @@ public:
     return (this->size == 0);
   }
 
-  virtual Array<size_t> find(T el) const final;
+  Array<size_t> find(const T& el) const;
 
   //ToDo: UnitTest
   virtual bool operator== (const Array<T>& other) const final
@@ -250,7 +250,7 @@ public:
    */
   void resize(size_t newSize)
   {
-    if (newSize < 1)
+    if (newSize > ARRAY_MAX_SIZE)
     {
       throw length_error("Size " + to_string(newSize) + " is not a valid array size!");
     }
@@ -288,7 +288,7 @@ public:
    */
   void resizeForce (size_t newSize)
   {
-    if (newSize < 1)
+    if (newSize > ARRAY_MAX_SIZE)
     {
       throw length_error("Size " + to_string(newSize) + " is not a valid array size!");
     }
@@ -321,26 +321,24 @@ protected:
   ResizableArray<T> arr;
 
 public:
-  DynamicArray<T>()
+  DynamicArray<T>() : arr(2)
   {
-    this->arr(2);
     this->count = 0;
     this->resizeFactor = 2;
   }
 
-  DynamicArray<T>(size_t size)
+  DynamicArray<T>(size_t size) : arr(size)
   {
     if (size > ARRAY_MAX_SIZE)
     {
       throw length_error("Size " + to_string(size) + " is not a valid array size!");
     }
 
-    this->arr(size);
     this->count = 0;
     this->resizeFactor = 2;
   }
   
-  DynamicArray<T>(size_t size, size_t resizeFactor)
+  DynamicArray<T>(size_t size, size_t resizeFactor) : arr(size)
   {
     if (size > ARRAY_MAX_SIZE)
     {
@@ -352,7 +350,6 @@ public:
       throw invalid_argument("Dynamic scaling factor must be bigger than 1!");
     }
 
-    this->arr(size);
     this->count = 0;
     this->resizeFactor = resizeFactor;
   }
@@ -488,7 +485,10 @@ public:
   template<typename func>
   void foreach(size_t startIdx, func&& f)
   {
-    if (startIdx < 0 || startIdx >= this->getCount())
+    if (this->getCount() == 0)
+      return;
+
+    if (startIdx >= this->getCount())
       throw invalid_argument("Start index must be inside array bounds!");
 
     for (size_t i = startIdx; i < this->getCount(); i++)
@@ -563,7 +563,7 @@ public:
 
   Array<T> toArray()
   {
-    Array<T> res(this->getCap());
+    Array<T> res(this->getCount());
     this->foreach([&](T& x, size_t idx)
     {
       res[idx] = x;
@@ -578,7 +578,8 @@ public:
  ******************************************************/
 
 //ToDo: Unit Test
-template <typename T> Array<size_t> Array<T>::find(T el) const
+template <typename T> 
+Array<size_t> Array<T>::find(const T& el) const
 {
   DynamicArray<size_t> res;
   for (size_t i = 0; i < this->size; i++)

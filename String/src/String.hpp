@@ -128,7 +128,7 @@ public:
     this->size = this->size + len;
   }
 
-  DynamicArray<size_t> find(const String& str)
+  Array<size_t> find(const String str)
   {
     DynamicArray<size_t> res;
     for (size_t i = 0; i < this->size; i++)
@@ -144,7 +144,7 @@ public:
       }
     }
 
-    return res;
+    return res.toArray();
   }
 
   /** 
@@ -154,7 +154,7 @@ public:
   {
     auto idx = this->find(rem);
 
-    for (size_t i = 0; i < idx.getCount(); i++)
+    for (size_t i = 0; i < idx.getSize(); i++)
     {
       this->remove(idx[i], rem.size - 1);
       this->insert(rep, idx[i]);
