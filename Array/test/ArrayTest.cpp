@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 
-#include "../src/Array.hpp"
+#include "Array.hpp"
 
 TEST_CASE("Test Array", "[array]")
 {

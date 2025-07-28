@@ -13,6 +13,8 @@ endif(NOT MSVC)
 
 add_subdirectory(Array)
 
+add_subdirectory(String)
+
 add_subdirectory(Map)
 
 add_subdirectory(Exception)
@@ -21,10 +23,14 @@ add_custom_target(run_after_build ALL
 	COMMENT 
 "Running Test cases for Modules:
 	- Array
+	- String
 	- Map"
 
   DEPENDS ArrayTest
   COMMAND ./Array/ArrayTest
+
+	DEPENDS StringTest
+	COMMAND ./String/StringTest
 
   DEPENDS MapTest
   COMMAND ./Map/MapTest

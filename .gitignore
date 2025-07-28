@@ -15,3 +15,9 @@ Testing
 
 # Dart Config (Fro some reason)
 *.tcl
+
+# Clangd Files
+.cache
+
+# VSCode Files
+.vscode

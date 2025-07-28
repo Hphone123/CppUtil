@@ -30,7 +30,7 @@ public:
    */
   U& operator [](const T& key)
   {
-    for (int i = 0; i < t.getCount(); i++)
+    for (size_t i = 0; i < t.getCount(); i++)
     {
       if (key == t[i])
       {
@@ -50,7 +50,7 @@ public:
    */
   U& tryGetItem(const T& key)
   {
-    for (int i = 0; i < t.getCount(); i++)
+    for (size_t i = 0; i < t.getCount(); i++)
     {
       if (key == t[i])
       {
@@ -67,7 +67,7 @@ public:
    */
   void trySetItem(const T& key, const U& item)
   {
-    for (int i = 0; i < t.getCount(); i++)
+    for (size_t i = 0; i < t.getCount(); i++)
     {
       if (key == t[i])
       {
@@ -85,7 +85,7 @@ public:
    */
   void tryRemoveItem(const T& key)
   {
-    for (int i = 0; i < t.getCount(); i++)
+    for (size_t i = 0; i < t.getCount(); i++)
     {
       if (key == t[i])
       {

@@ -1,4 +1,6 @@
-#include <exception>
+#pragma once
+
+#include <stdexcept>
 #include <string>
 
 struct not_found : public std::logic_error{
