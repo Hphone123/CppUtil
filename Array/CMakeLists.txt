@@ -29,6 +29,8 @@ target_include_directories(Array
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+target_precompile_headers(Array INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.hpp)
+
 add_executable(ArrayTest 
 	test/ArrayTest.cpp)
 

@@ -16,10 +16,12 @@ find_package(Catch2 REQUIRED)
 add_library(Exception 
 	STATIC 
 		src/Exception.hpp)
-
+		
 set_target_properties(Exception 
 	PROPERTIES 
 		LINKER_LANGUAGE CXX)
+		
+target_precompile_headers(Exception INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Exception.hpp)
 
 target_include_directories(Exception 
 	PUBLIC 

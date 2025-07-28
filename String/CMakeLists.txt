@@ -30,6 +30,8 @@ target_include_directories(String
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+target_precompile_headers(String INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/String.hpp)
+
 add_executable(StringTest 
 	test/StringTest.cpp)
 
