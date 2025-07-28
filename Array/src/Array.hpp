@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <functional>
+#include <string>
 #include "Exception.hpp"
 
 // Hope a billion is enough elements you sick people
@@ -94,7 +95,7 @@ public:
     delete[] this->arr;
   }
 
-  T& operator[] (size_t idx)
+  virtual T& operator[] (size_t idx) final
   {
     if (idx < 0)
     {
@@ -111,7 +112,7 @@ public:
     }
   }
   
-  T operator[] (size_t idx) const
+  virtual T operator[] (size_t idx) const final
   {
     if (idx < 0)
     {
@@ -128,20 +129,20 @@ public:
     }
   }
 
-  size_t getSize() const
+  virtual size_t getSize() const final
   {
     return this->size;
   }
 
-  bool isEmpty() const
+  virtual bool isEmpty() const final
   {
     return (this->size == 0);
   }
 
-  Array<size_t> find(T el) const;
+  virtual Array<size_t> find(T el) const final;
 
   //ToDo: UnitTest
-  bool operator== (const Array<T>& other) const
+  virtual bool operator== (const Array<T>& other) const final
   {
     if (this->size != other.size)
       return false;
@@ -153,7 +154,7 @@ public:
     return true;
   }
 
-  bool operator!=(const Array<T>& other) const
+  virtual bool operator!=(const Array<T>& other) const final
   {
     return !(this->operator==(other));
   }
@@ -311,119 +312,139 @@ public:
   }
 };
 
-template <typename T> class DynamicArray : public ResizableArray<T>
+template <typename T> class DynamicArray
 {
 protected:
-  size_t idx = 0;
+  size_t count = 0;
   size_t resizeFactor = 2;
 
-  using ResizableArray<T>::resize;
-  using ResizableArray<T>::resizeForce;
+  ResizableArray<T> arr;
 
 public:
-  DynamicArray<T>() : ResizableArray<T>(2)
+  DynamicArray<T>()
   {
-    this->idx = 0;
+    this->arr(2);
+    this->count = 0;
     this->resizeFactor = 2;
   }
 
-  DynamicArray<T>(size_t size) :  ResizableArray<T>(size)
+  DynamicArray<T>(size_t size)
   {
-    if (size < 1)
+    if (size > ARRAY_MAX_SIZE)
     {
-      throw invalid_argument("Size must be bigger than 0!");
+      throw length_error("Size " + to_string(size) + " is not a valid array size!");
     }
 
-    this->idx = 0;
+    this->arr(size);
+    this->count = 0;
     this->resizeFactor = 2;
   }
   
-  DynamicArray<T>(size_t size, size_t resizeFactor) :  ResizableArray<T>(size)
+  DynamicArray<T>(size_t size, size_t resizeFactor)
   {
-    if (size < 1)
+    if (size > ARRAY_MAX_SIZE)
     {
-      throw invalid_argument("Size must be bigger than 0!");
+      throw length_error("Size " + to_string(size) + " is not a valid array size!");
     }
 
     if (resizeFactor < 2)
     {
       throw invalid_argument("Dynamic scaling factor must be bigger than 1!");
     }
-    this->idx = 0;
+
+    this->arr(size);
+    this->count = 0;
     this->resizeFactor = resizeFactor;
   }
   
   T& operator[] (size_t idx)
   {
-    if (idx < 0)
+    if (idx > ARRAY_MAX_SIZE)
     {
       throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
     }
     
-    if (idx >= this->idx)
+    if (idx >= this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->idx) + " elements!");
+      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) + " elements!");
+    }
+    
+    return this->arr[idx];
+  }
+  
+  T operator[] (size_t idx) const 
+  {
+    if (idx > ARRAY_MAX_SIZE)
+    {
+      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+    }
+
+    if (idx >= this->count)
+    {
+      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) + " elements!");
     }
 
     return this->arr[idx];
   }
   
-  T operator[] (size_t idx) const = delete;
-  
-  void add(T item)
+  size_t getCount() const
   {
-    if (this->idx >= this->size)
+    return this->count;
+  }
+
+  virtual size_t getCap() const final
+  {
+    return this->arr.getSize();
+  }
+  
+  virtual void add(T item) final
+  {
+    if (this->count >= this->getCap())
     {
-      this->resize(this->idx * this->resizeFactor);
+      this->arr.resize(this->count * this->resizeFactor);
     }
 
-    this->arr[idx++] = item; 
-    
-  }
-
-  size_t getCount()
-  {
-    return this->idx;
+    this->arr[count++] = item; 
   }
   
-  void add(T item, size_t idx)
+  virtual void add(T item, size_t idx) final
   {
-    if (idx < 0)
+    if (idx > ARRAY_MAX_SIZE)
     {
       throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
     }
     
-    if (idx > this->idx)
+    if (idx > this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->idx) + " elements!");
+      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) + " elements!");
     }
     
-    if (this->idx >= this->size)
+    if (this->count >= this->getCap())
     {
-      this->resize(this->size * this->resizeFactor);
+      this->arr.resize(this->getCap() * this->resizeFactor);
     }
     
-    for (size_t i = this->size - 1; i > idx; i--)
+    for (size_t i = this->getCap() - 1; i > idx; i--)
     {
       this->arr[i] = this->arr[i-1];
     }
     
     this->arr[idx] = item;
-    this->idx++;
+    this->count++;
   }
   /**
    * Remove the last element (the one with the biggest index) from the array
    * 
    * @throws `length_error` if array is already empty.
    */
-  void remove()
+  virtual void remove() final
   {
-    if (idx > 0)
+    if (count > 0)
     {
-      --idx;
-      if (idx * resizeFactor <= this->size && this->size >= this->resizeFactor)
+      --count;
+      if (count * resizeFactor <= this->getCap() && this->getCap() >= this->resizeFactor)
       {
-        this->resizeForce(this->size / resizeFactor);
+        this->arr.resizeForce(this->getCap() / resizeFactor);
       }
     }
     else
@@ -439,47 +460,28 @@ public:
    * 
    * @throw `out_of_range` if 
    */
-  void remove(size_t idx)
+  virtual void remove(size_t idx) final
   {
     if (idx < 0)
     {
       throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
     }
 
-    if (idx > this->idx)
+    if (idx > this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->idx) + " elements!");
+      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) + " elements!");
     }
 
-    this->idx--;
+    this->count--;
 
-    for (size_t i = idx; i < this->idx; i++)
+    for (size_t i = idx; i < this->count; i++)
     {
       this->arr[i] = this->arr[i + 1];
     }
 
-    if (this->idx * this->resizeFactor <= this->size && this->size >= this->resizeFactor)
+    if (this->count * this->resizeFactor <= this->getCap() && this->getCap() >= this->resizeFactor)
     {
-      this->resizeForce(this->size / this->resizeFactor);
-    }
-  }
-
-  template<typename func>
-  /**
-   * foreach - Do something for each element in the DynamicArray
-   * @param f - lambda or function pointer with signature `void(T)`
-   * @return nothing
-   */
-  void foreach(func&& f)
-  {
-    for (size_t i = 0; i < this->getCount(); i++)
-    {
-      if constexpr (std::is_invocable_v<func, T>)
-        f(this->operator[](i));
-      else if constexpr (std::is_invocable_v<func, T, size_t>) 
-        f(this->operator[](i), i);
-      else
-        static_assert(std::is_invocable_v<func, T> || std::is_invocable_v<func, T, int>, "Function must have signature 'void(T)' or 'void(T, int)'!");
+      this->arr.resizeForce(this->getCap() / this->resizeFactor);
     }
   }
 
@@ -491,13 +493,82 @@ public:
 
     for (size_t i = startIdx; i < this->getCount(); i++)
     {
-      if constexpr (std::is_invocable_v<func, T>)
+      if constexpr (std::is_invocable_v<func, T&>)
         f(this->operator[](i));
-      else if constexpr (std::is_invocable_v<func, T, size_t>)
+      else if constexpr (std::is_invocable_v<func, T&, size_t>)
         f(this->operator[](i), i);
       else
-        static_assert(std::is_invocable_v<func, T> || std::is_invocable_v<func, T, size_t>, "Function must have signature 'void(T)' or 'void(T, size_t)'!");
+        static_assert(std::is_invocable_v<func, T&> || 
+                      std::is_invocable_v<func, T&, size_t>, 
+                        "Function must have signature 'void(T&)' or 'void(T&, size_t)'!");
     }
+  }
+
+  template<typename func>
+  void foreach(func&& f)
+  {
+    this->foreach(0, f);
+  }
+
+  template<typename func>
+  bool any(func&& f)
+  {
+    for (size_t i = 0; i < this->getCount(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, T&>)
+      {
+        if (f(this->operator[](i)))
+          return true;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, T&, size_t>)
+      {
+        if (f(this->operator[](i), i))
+          return true;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, T&> || 
+                      std::is_invocable_r_v<bool, func, T&, size_t>, 
+                        "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }  
+    }
+    return false;    
+  }
+
+  template<typename func>
+  bool all(func&& f)
+  {
+
+    for (size_t i = 0; i < this->getCount(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, T&>)
+      {
+        if (!f(this->operator[](i)))
+          return false;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, T&, size_t>)
+      {
+        if (!f(this->operator[](i), i))
+          return false;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, T&> || 
+                      std::is_invocable_r_v<bool, func, T&, size_t>, 
+                        "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }  
+    }
+    return true;
+  }
+
+  Array<T> toArray()
+  {
+    Array<T> res(this->getCap());
+    this->foreach([&](T& x, size_t idx)
+    {
+      res[idx] = x;
+    });
+    return res;
   }
 };
 
@@ -517,14 +588,13 @@ template <typename T> Array<size_t> Array<T>::find(T el) const
       res.add(i);
     }
   }
-
-  if (res.getCount() == 0)
-  {
-    throw not_found("Could not find element!");
-  }
-
-  return res;
+  
+  return res.toArray();
 }
+
+/******************************************************
+ * Static / Class-less functions
+ ******************************************************/
 
 template<typename T, typename func>
 static void foreach(Array<T> arr, func&& f)
