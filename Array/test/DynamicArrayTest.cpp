@@ -138,3 +138,58 @@ TEST_CASE("DynamicArray Remove", "[dynamic_arary][remove]")
     REQUIRE_THROWS_AS(arr.remove(0), length_error);
   }
 }
+
+TEST_CASE("DynamicArray loops", "[dynamic_array][loop]")
+{
+
+  DynamicArray<int> arr;
+  for (int i = 0; i < 10'000; i++)
+  {
+    arr.add(i);
+  }
+
+  SECTION("Foreach does something for each element", "[foreach]")
+  {
+    REQUIRE_NOTHROW(arr.foreach([](int& x){x++;}));
+
+    for (int i = 0; i < 10'000; i++)
+    {
+      REQUIRE(i+1 == arr[i]);
+    }
+  }
+  
+  SECTION("Foreach does something for each element beginning at an index", "[foreach]")
+  {
+    REQUIRE_NOTHROW(arr.foreach(2'000, [](int& x){x++;}));
+    
+    for (int i = 0; i < 2'000; i++)
+    {
+      REQUIRE(i == arr[i]);
+    }
+
+    for (int i = 2'000; i < 10'000; i++)
+    {
+      REQUIRE(i+1 == arr[i]);
+    }
+  }
+
+  SECTION("All returns true when the function returns true for all elements", "[all]")
+  {
+    REQUIRE(arr.all([](int& x, size_t i){return x == (int)i;}));
+  }
+
+  SECTION("All returns false when the function returns false for one element", "[all]")
+  {
+    REQUIRE_FALSE(arr.all([](int& x){return x < 9'999;}));
+  }
+
+  SECTION("Any returns true when the function returns true for one element", "[any]")
+  {
+    REQUIRE(arr.any([](int& x){return x == 9'999;}));
+  }
+
+  SECTION("Any returns false when the function returns false for all element", "[any]")
+  {
+    REQUIRE_FALSE(arr.any([](int& x){return x > 9'999;}));
+  }
+}
