@@ -8,7 +8,6 @@
 // Hope a billion is enough elements you sick people
 #define ARRAY_MAX_SIZE 1'000'000'000
 
-
 using namespace std;
 
 template <typename T> class Array
@@ -327,22 +326,22 @@ public:
     this->resizeFactor = 2;
   }
 
-  DynamicArray<T>(size_t size) : arr(size)
+  DynamicArray<T>(size_t cap) : arr(cap)
   {
-    if (size > ARRAY_MAX_SIZE)
+    if (cap > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(size) + " is not a valid array size!");
+      throw length_error("Size " + to_string(cap) + " is not a valid array size!");
     }
 
     this->count = 0;
     this->resizeFactor = 2;
   }
   
-  DynamicArray<T>(size_t size, size_t resizeFactor) : arr(size)
+  DynamicArray<T>(size_t cap, size_t resizeFactor) : arr(cap)
   {
-    if (size > ARRAY_MAX_SIZE)
+    if (cap > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(size) + " is not a valid array size!");
+      throw length_error("Size " + to_string(cap) + " is not a valid array size!");
     }
 
     if (resizeFactor < 2)
@@ -392,6 +391,11 @@ public:
   virtual size_t getCap() const final
   {
     return this->arr.getSize();
+  }
+
+  size_t getResizeFactor() const
+  {
+    return this->resizeFactor;
   }
   
   virtual void add(T item) final
@@ -459,12 +463,17 @@ public:
    */
   virtual void remove(size_t idx) final
   {
-    if (idx < 0)
+    if (idx > ARRAY_MAX_SIZE)
     {
       throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
     }
 
-    if (idx > this->count)
+    if (this->count == 0)
+    {
+      throw length_error("Cannot remove element from empty dynamic array!");
+    }
+
+    if (idx >= this->count)
     {
       throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) + " elements!");
     }
@@ -481,6 +490,8 @@ public:
       this->arr.resizeForce(this->getCap() / this->resizeFactor);
     }
   }
+
+  // ToDo: UnitTest all below!
 
   template<typename func>
   void foreach(size_t startIdx, func&& f)

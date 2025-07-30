@@ -1,102 +1,140 @@
 #include <catch2/catch.hpp>
 #include <stdexcept>
 
+#define UNIT_TEST 1
+
 #include "Array.hpp"
+#include <iostream>
 
-TEST_CASE("Test DynamicArray", "[array]")
+TEST_CASE("DynamicArray Init", "[dynamic_array][init]")
 {
-  DynamicArray<std::string> a = DynamicArray<std::string>();
-  a.add("Test 1");
-  a.add("Test 2");
-  a.add("Test 3");
-  
-  SECTION("Elements can be apended to DynamicArray", "[add]")
-  {
-    DynamicArray<std::string> b = DynamicArray<std::string>();
-    REQUIRE_NOTHROW([&](){
-      b.add("String 1");
-      b.add("String 2");
-      b.add("String 3");
-      
-      REQUIRE(b[0] == "String 1");
-      REQUIRE(b[1] == "String 2");
-      REQUIRE(b[2] == "String 3");
-    }());
-  }
-  
 
-  SECTION("Elements can be added into DynamicArray", "[add]")
-  {
-    a.add("String 1", 0);
-    a.add("String 2", 2);
-    a.add("String 3", 4);
+  DynamicArray<int> arr;
 
-    REQUIRE(a[0] == "String 1");
-    REQUIRE(a[1] == "Test 1");
-    REQUIRE(a[2] == "String 2");
-    REQUIRE(a[3] == "Test 2");
-    REQUIRE(a[4] == "String 3");
-    REQUIRE(a[5] == "Test 3");
+  SECTION("DynamicArray can be constructed")
+  {
+    REQUIRE_NOTHROW(arr = DynamicArray<int>());
   }
 
-  SECTION("Elements can be removed from the end of DynamicArray until empty" "[remove]")
+  SECTION("DynamicArray can be constructedwith capacity argument")
   {
-    SECTION("Elements can be removed from DynamicArray", "[remove]")
+    REQUIRE_NOTHROW(arr = DynamicArray<int>(5));
+    REQUIRE(5 == arr.getCap());
+  }
+
+  SECTION("DynamicArray can be constructedwith capacity and resizeFactor arguments")
+  {
+    REQUIRE_NOTHROW(arr = DynamicArray<int>(5, 3));
+    REQUIRE(5 == arr.getCap());
+    REQUIRE(3 == arr.getResizeFactor());
+  }
+}
+
+TEST_CASE("DynamicArray Access", "[dynamic_array][access]")
+{
+  DynamicArray<int> arr(5);
+  arr.add(1);
+  arr.add(2);
+  arr.add(3);
+  arr.add(4);
+  arr.add(5);
+  
+  SECTION("DynamicArray elements can be retrieved")
+  {
+    REQUIRE_NOTHROW(arr[0] = 10);
+    REQUIRE(arr[0] == 10);
+  }
+
+  SECTION("DynamicArray cannot be accessed out of bounds")
+  {
+    REQUIRE_THROWS_AS(arr[5] = 100, out_of_range);
+  }
+}
+
+TEST_CASE("DynamicArray Add", "[dynamic_array][add]")
+{
+
+  DynamicArray<size_t> arr;
+
+  SECTION("Elements can be added to DynamicArray")
+  {
+    REQUIRE_NOTHROW(arr.add(1));
+    REQUIRE_NOTHROW(arr.add(2));
+
+    REQUIRE(arr[0] == 1);
+    REQUIRE(arr[1] == 2);
+  }
+
+  SECTION("DynamicArray Sizes up when adding elements", "[resize]")
+  {
+    for (int i = 0; i < 10; i++)
     {
-      SECTION("Remove 1 Elements", "[remove]")
-      {
-        REQUIRE_NOTHROW  (a.remove());
-        REQUIRE          (a[0] == "Test 1");
-        REQUIRE          (a[1] == "Test 2");
-        REQUIRE_THROWS_AS(a[2] == "Test 3", std::out_of_range);
-      }
-      
-      SECTION("Remove 2 Elements", "[remove]")
-      {
-        REQUIRE_NOTHROW([&](){
-          REQUIRE_NOTHROW  (a.remove());
-          REQUIRE_NOTHROW  (a.remove());
-          REQUIRE          (a[0] == "Test 1");
-          REQUIRE_THROWS_AS(a[1] == "Test 2", std::out_of_range);
-          REQUIRE_THROWS_AS(a[2] == "Test 3", std::out_of_range);
-        }());
-      }
-      
-      SECTION("Remove 3 Elements", "[remove]")
-      {
-        REQUIRE_NOTHROW  (a.remove());
-        REQUIRE_NOTHROW  (a.remove());
-        REQUIRE_NOTHROW  (a.remove());
-        REQUIRE_THROWS_AS(a[0] == "Test 1", std::out_of_range);
-        REQUIRE_THROWS_AS(a[1] == "Test 2", std::out_of_range);
-        REQUIRE_THROWS_AS(a[2] == "Test 3", std::out_of_range);
-      }
+      REQUIRE_NOTHROW(arr.add(i));
     }
     
-    SECTION("Elements cannot be removed from empty DynamicArray", "[remove]")
+    REQUIRE(16 == arr.getCap());
+  }
+  
+  SECTION("Elements can be inserted into DynamicArray", "[insert]")
+  {
+    size_t idx = 500;
+
+    for (size_t i = 0; i < 10'000; i++)
     {
-      REQUIRE_NOTHROW  (a.remove());
-      REQUIRE_NOTHROW  (a.remove());
-      REQUIRE_NOTHROW  (a.remove());
-      REQUIRE_THROWS_AS(a.remove(), std::length_error);
+      REQUIRE_NOTHROW(arr.add(i));
+    }
+    
+    REQUIRE_NOTHROW(arr.add(10'000 + 1, idx));
+
+    for (size_t i = 0; i < idx; i++)
+    {
+      REQUIRE(i == arr[i]);
+    }
+
+    REQUIRE(10'000 + 1 == arr[idx]);
+    
+    for (size_t i = idx; i < 10'000; i++)
+    {
+      REQUIRE(i == arr[i + 1]);
     }
   }
+}
 
-  SECTION("Elements can be removed from the middle of DynamicArray", "[remove]")
+TEST_CASE("DynamicArray Remove", "[dynamic_arary][remove]")
+{
+
+  DynamicArray<int> arr(5);
+  arr.add(1);
+  arr.add(2);
+  arr.add(3);
+  arr.add(4);
+  arr.add(5);
+
+  SECTION("Elements can be removed from the end of DynamicArray")
   {
-    REQUIRE_NOTHROW  (a.remove(1));
-    REQUIRE          (a[0] == "Test 1");
-    REQUIRE_THROWS_AS(a[2] == "Test 2", std::out_of_range);
-    REQUIRE          (a[1] == "Test 3");
-    
-    REQUIRE_NOTHROW  (a.remove(0));
-    REQUIRE_THROWS_AS(a[1] == "Test 1", std::out_of_range);
-    REQUIRE_THROWS_AS(a[2] == "Test 2", std::out_of_range);
-    REQUIRE          (a[0] == "Test 3");
-    
-    REQUIRE_NOTHROW  (a.remove(0));
-    REQUIRE_THROWS_AS(a[0] == "Test 1", std::out_of_range);
-    REQUIRE_THROWS_AS(a[1] == "Test 2", std::out_of_range);
-    REQUIRE_THROWS_AS(a[2] == "Test 3", std::out_of_range);
+    REQUIRE_NOTHROW(arr.remove());
+    REQUIRE_THROWS_AS(arr[4], out_of_range);
+  }
+  
+  SECTION("Elements can be removed from the middle of the DynaicArray")
+  {
+    REQUIRE_NOTHROW(arr.remove(2));
+    REQUIRE_THROWS_AS(arr[4], out_of_range);
+    REQUIRE(arr[0] == 1);
+    REQUIRE(arr[1] == 2);
+    REQUIRE(arr[2] == 4);
+    REQUIRE(arr[3] == 5);
+  }
+  
+  SECTION("Elements cannot be removed from empty DynamicArray")
+  {
+    REQUIRE_NOTHROW(arr.remove());
+    REQUIRE_NOTHROW(arr.remove());
+    REQUIRE_NOTHROW(arr.remove());
+    REQUIRE_NOTHROW(arr.remove());
+    REQUIRE_NOTHROW(arr.remove());
+
+    REQUIRE_THROWS_AS(arr.remove(), length_error);
+    REQUIRE_THROWS_AS(arr.remove(0), length_error);
   }
 }
