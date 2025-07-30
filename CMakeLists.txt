@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(CppUtil VERSION 0.1.0)
 
+option(ALLOW_TEST_FAIL "Allow tests to fail, but still continue the build" OFF)
+option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
+option(CREATE_PCH "Create PCH's for all headers" ON)
+
+if(ALLOW_TEST_FAIL)
+  set(TEST_FAILSAFE || echo Continue...)
+endif()
+
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -12,15 +20,21 @@ if(NOT MSVC)
 endif(NOT MSVC)
 
 add_subdirectory(Array)
-	add_custom_target(RunArrayTest 					ALL COMMENT "Running tests for 'Array'" 					DEPENDS ArrayTest 					COMMAND ./Array/ArrayTest)
-	add_custom_target(RunResizableArrayTest ALL COMMENT "Running tests for 'ResizableArray'"  DEPENDS ResizableArrayTest 	COMMAND ./Array/ResizableArrayTest)
-	add_custom_target(RunDynamicArrayTest 	ALL COMMENT "Running tests for 'DynamicArray'"    DEPENDS DynamicArrayTest    COMMAND ./Array/DynamicArrayTest)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunArrayTest 					ALL COMMENT "Running tests for 'Array'" 					DEPENDS ArrayTest 					COMMAND ./Array/ArrayTest ${TEST_FAILSAFE})
+	add_custom_target(RunResizableArrayTest ALL COMMENT "Running tests for 'ResizableArray'"  DEPENDS ResizableArrayTest 	COMMAND ./Array/ResizableArrayTest ${TEST_FAILSAFE})
+	add_custom_target(RunDynamicArrayTest 	ALL COMMENT "Running tests for 'DynamicArray'"    DEPENDS DynamicArrayTest    COMMAND ./Array/DynamicArrayTest ${TEST_FAILSAFE})
+endif()
 
 add_subdirectory(String)
-	add_custom_target(RunStringTest 				ALL COMMENT "Running tests for 'String'"					DEPENDS StringTest					COMMAND ./Array/StringTest)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunStringTest 				ALL COMMENT "Running tests for 'String'"					DEPENDS StringTest					COMMAND ./String/StringTest ${TEST_FAILSAFE})
+endif()
 
 add_subdirectory(Map)
-	add_custom_target(RunMapTest 						ALL COMMENT "Running tests for 'Map'"							DEPENDS MapTest							COMMAND ./Map/MapTest)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunMapTest 						ALL COMMENT "Running tests for 'Map'"							DEPENDS MapTest							COMMAND ./Map/MapTest ${TEST_FAILSAFE})
+endif()
 
 add_subdirectory(Exception)
 

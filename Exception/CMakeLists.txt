@@ -21,7 +21,9 @@ set_target_properties(Exception
 	PROPERTIES 
 		LINKER_LANGUAGE CXX)
 		
-target_precompile_headers(Exception INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Exception.hpp)
+if (CREATE_PCH)
+	target_precompile_headers(Exception INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Exception.hpp)
+endif()
 
 target_include_directories(Exception 
 	PUBLIC 

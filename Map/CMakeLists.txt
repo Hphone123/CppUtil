@@ -38,7 +38,9 @@ set_target_properties(Map
 	PROPERTIES 
 		LINKER_LANGUAGE CXX)
 
-target_precompile_headers(Map INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Map.hpp)
+if (CREATE_PCH)
+	target_precompile_headers(Map INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Map.hpp)
+endif()
 
 
 add_executable			 (MapTest 	
