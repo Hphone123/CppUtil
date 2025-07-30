@@ -29,17 +29,25 @@ target_include_directories(Array
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_precompile_headers(Array INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.hpp)
+if (CREATE_PCH)
+	target_precompile_headers(Array INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.hpp)
+endif()
 
-add_executable(ArrayTest 
-	test/ArrayTest.cpp)
+add_executable(ArrayTest 					test/ArrayTest.cpp)
+add_executable(ResizableArrayTest test/ResizableArrayTest.cpp)
+add_executable(DynamicArrayTest   test/DynamicArrayTest.cpp)
 
-target_link_libraries(ArrayTest
-	PUBLIC
-		Array)
+target_link_libraries(ArrayTest          PUBLIC Array)
+target_link_libraries(ResizableArrayTest PUBLIC Array)
+target_link_libraries(DynamicArrayTest   PUBLIC Array)
 
-target_link_libraries(ArrayTest PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(ArrayTest 				 PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(ResizableArrayTest PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(DynamicArrayTest   PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 include(Catch)
+
 catch_discover_tests(ArrayTest)
+catch_discover_tests(ResizableArrayTest)
+catch_discover_tests(DynamicArrayTest)
