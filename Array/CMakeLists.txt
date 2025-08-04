@@ -12,7 +12,7 @@ if(NOT MSVC)
 endif(NOT MSVC)
 
 if (BUILD_TESTS)
-find_package(Catch2 REQUIRED)
+	find_package(Catch2 REQUIRED)
 endif()
 
 add_library(Array 

@@ -11,7 +11,9 @@ if(NOT MSVC)
 	add_compile_options(-pedantic)
 endif(NOT MSVC)
 
-find_package(Catch2 REQUIRED)
+if (BUILD_TESTS)
+	find_package(Catch2 REQUIRED)
+endif()
 
 add_library(Exception 
 	STATIC 
