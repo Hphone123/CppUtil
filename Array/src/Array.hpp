@@ -94,6 +94,16 @@ public:
     delete[] this->arr;
   }
 
+  virtual T& operator[](int idx) final
+  {
+    return this->operator[]((size_t)idx);
+  }
+
+  const T& operator[](int idx) const
+  {
+    return this->operator[]((size_t)idx);
+  }
+
   virtual T& operator[] (size_t idx) final
   {
     if (idx < 0)
@@ -161,7 +171,7 @@ public:
   template<typename func>
   void foreach(const func&& f)
   {
-    for (int i = 0; i < this->getSize(); i++)
+    for (size_t i = 0; i < this->getSize(); i++)
     {
       if constexpr (std::is_invocable_v<func, T&>)
       {
@@ -183,7 +193,7 @@ public:
   template<typename func>
   bool all(const func&& f)
   {
-    for (int i = 0; i < this->getSize(); i++)
+    for (size_t i = 0; i < this->getSize(); i++)
     {
       if constexpr (std::is_invocable_r_v<bool, func, T&>)
       {
@@ -208,7 +218,7 @@ public:
   template<typename func>
   bool any(const func&& f)
   {
-    for (int i = 0; i < this->getSize(); i++)
+    for (size_t i = 0; i < this->getSize(); i++)
     {
       if constexpr (std::is_invocable_r_v<bool, func, T&>)
       {
@@ -611,7 +621,7 @@ Array<size_t> Array<T>::find(const T& el) const
 template<typename T, typename func>
 static void foreach(Array<T> arr, func&& f)
 {
-  for (int i = 0; i < arr.getSize(); i++)
+  for (size_t i = 0; i < arr.getSize(); i++)
   {
     f(arr[i]);
   }
@@ -620,7 +630,7 @@ static void foreach(Array<T> arr, func&& f)
 template<typename T, typename func>
 static void foreach(DynamicArray<T> arr, func&& f)
 {
-  for (int i = 0; i < arr.getCount(); i++)
+  for (size_t i = 0; i < arr.getCount(); i++)
   {
     f(arr[i]);
   }

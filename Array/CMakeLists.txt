@@ -11,7 +11,9 @@ if(NOT MSVC)
 	add_compile_options(-pedantic)
 endif(NOT MSVC)
 
+if (BUILD_TESTS)
 find_package(Catch2 REQUIRED)
+endif()
 
 add_library(Array 
 	STATIC 
@@ -33,21 +35,23 @@ if (CREATE_PCH)
 	target_precompile_headers(Array INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.hpp)
 endif()
 
-add_executable(ArrayTest 					test/ArrayTest.cpp)
-add_executable(ResizableArrayTest test/ResizableArrayTest.cpp)
-add_executable(DynamicArrayTest   test/DynamicArrayTest.cpp)
+if (BUILD_TESTS)
+	add_executable(ArrayTest 					test/ArrayTest.cpp)
+	add_executable(ResizableArrayTest test/ResizableArrayTest.cpp)
+	add_executable(DynamicArrayTest   test/DynamicArrayTest.cpp)
 
-target_link_libraries(ArrayTest          PUBLIC Array)
-target_link_libraries(ResizableArrayTest PUBLIC Array)
-target_link_libraries(DynamicArrayTest   PUBLIC Array)
+	target_link_libraries(ArrayTest          PUBLIC Array)
+	target_link_libraries(ResizableArrayTest PUBLIC Array)
+	target_link_libraries(DynamicArrayTest   PUBLIC Array)
 
-target_link_libraries(ArrayTest 				 PRIVATE Catch2::Catch2WithMain)
-target_link_libraries(ResizableArrayTest PRIVATE Catch2::Catch2WithMain)
-target_link_libraries(DynamicArrayTest   PRIVATE Catch2::Catch2WithMain)
+	target_link_libraries(ArrayTest 				 PRIVATE Catch2::Catch2WithMain)
+	target_link_libraries(ResizableArrayTest PRIVATE Catch2::Catch2WithMain)
+	target_link_libraries(DynamicArrayTest   PRIVATE Catch2::Catch2WithMain)
 
-include(CTest)
-include(Catch)
+	include(CTest)
+	include(Catch)
 
-catch_discover_tests(ArrayTest)
-catch_discover_tests(ResizableArrayTest)
-catch_discover_tests(DynamicArrayTest)
+	catch_discover_tests(ArrayTest)
+	catch_discover_tests(ResizableArrayTest)
+	catch_discover_tests(DynamicArrayTest)
+endif()

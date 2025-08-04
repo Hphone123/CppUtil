@@ -11,7 +11,9 @@ if(NOT MSVC)
 	add_compile_options(-pedantic)
 endif(NOT MSVC)
 
-find_package(Catch2 REQUIRED)
+if (BUILD_TESTS)
+	find_package(Catch2 REQUIRED)
+endif()
 
 add_library(String 
 	STATIC 
@@ -34,17 +36,19 @@ if (CREATE_PCH)
 	target_precompile_headers(String INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/String.hpp)
 endif()
 
-add_executable(StringTest 
-	test/StringTest.cpp)
+if (BUILD_TESTS)
+	add_executable(StringTest 
+		test/StringTest.cpp)
 
-target_link_libraries(StringTest
-	PUBLIC
-		String)
+	target_link_libraries(StringTest
+		PUBLIC
+			String)
 
-target_link_libraries(StringTest 
-	PRIVATE 
-		Catch2::Catch2WithMain)
+	target_link_libraries(StringTest 
+		PRIVATE 
+			Catch2::Catch2WithMain)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(StringTest)
+	include(CTest)
+	include(Catch)
+	catch_discover_tests(StringTest)
+endif()

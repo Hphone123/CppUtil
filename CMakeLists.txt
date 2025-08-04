@@ -4,9 +4,14 @@ project(CppUtil VERSION 0.1.0)
 option(ALLOW_TEST_FAIL "Allow tests to fail, but still continue the build" OFF)
 option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
 option(CREATE_PCH "Create PCH's for all headers" ON)
+option(BUILD_TESTS "Create test executables" ON)
 
 if(ALLOW_TEST_FAIL)
-  set(TEST_FAILSAFE || echo Continue...)
+  set(TEST_FAILSAFE || echo Continue...\n)
+endif()
+
+if (NOT BUILD_TESTS)
+	set(RUN_TESTS_AFTER_BUILD OFF)
 endif()
 
 set (CMAKE_CXX_STANDARD 14)
