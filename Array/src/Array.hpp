@@ -196,6 +196,22 @@ public:
     return true;
   }
 
+  void shiftLeft(const size_t num)
+  {
+    for (int i = num; i < this->size; i++)
+    {
+      this->operator[](i-num) = this->operator[](i);
+    }
+  }
+
+  void shiftRight(const size_t num)
+  {
+    for (int i = this->size - num; i > 0; i--)
+    {
+      this->operator[](i+num) = this->operator[](i);
+    }
+  }
+
   //ToDo: UnitTest
   virtual bool operator== (const Array<T>& other) const final
   {
@@ -232,6 +248,28 @@ public:
         static_assert(std::is_invocable_v<func, T&> || 
                       std::is_invocable_v<func, T&, size_t>, 
                         "Function must have signature 'void(T&)' or 'void(T&, size_t)'!");
+      }
+    }
+  }
+
+  template<typename func>
+  void foreach(const func&& f) const
+  {
+    for (size_t i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_v<func, const T&>)
+      {
+        f(this->operator[](i));
+      }
+      else if constexpr (std::is_invocable_v<func, const T&, size_t>)
+      {
+        f(this->operator[](i), i);
+      }
+      else
+      {
+        static_assert(std::is_invocable_v<func, const T&> || 
+                      std::is_invocable_v<func, const T&, size_t>, 
+                        "Function must have signature 'void(const T&)' or 'void(const T&, size_t)'!");
       }
     }
   }
@@ -731,3 +769,43 @@ static void foreach(DynamicArray<T> arr, func&& f)
     f(arr[i]);
   }
 }
+
+namespace std 
+{
+	template<typename T>
+	string to_string(const Array<T> arr)
+	{
+		string res = "{";
+		arr.foreach([&](const T& el)
+		{
+			res += to_string(el) + " ";
+		});
+		res += "}";
+		return res;
+	}
+
+	template<typename T>
+	string to_string(const Array<T> arr, size_t n)
+	{
+		string res = "{";
+		arr.foreach([&](const T& el, size_t i)
+		{
+			if (i < n)
+				res += to_string(el) + " ";
+		});
+		res += "}";
+		return res;
+	}
+
+  template<typename T>
+  string to_string(const DynamicArray<T>& arr)
+  {
+    string res = "{";
+    arr.foreach([&](const T& el)
+    {
+      res += to_string(el) + " ";
+    });
+    res += "}";
+    return res;
+  }
+};
