@@ -58,7 +58,7 @@ TEST_CASE("Get / Set / Remove item", "[non_add_operation]")
   }());
 }
 
-TEST_CASE("Map gan be initialized with initializer list", "[initialize]")
+TEST_CASE("Map can be initialized with initializer list", "[initialize]")
 {
   REQUIRE_NOTHROW([&](){
 

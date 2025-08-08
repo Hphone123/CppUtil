@@ -12,8 +12,9 @@ if(NOT MSVC)
 endif(NOT MSVC)
 
 # Find Catch2
-
-find_package(Catch2 REQUIRED)
+if (BUILD_TESTS)
+	find_package(Catch2 REQUIRED)
+endif()
 
 # Add lib
 
@@ -38,18 +39,23 @@ set_target_properties(Map
 	PROPERTIES 
 		LINKER_LANGUAGE CXX)
 
+if (CREATE_PCH)
+	target_precompile_headers(Map INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/Map.hpp)
+endif()
 
-add_executable			 (MapTest 	
-	test/MapTest.cpp)
+if (BUILD_TESTS)
+	add_executable			 (MapTest 	
+		test/MapTest.cpp)
 
-target_link_libraries(MapTest 
-	PUBLIC
-		Map)
+	target_link_libraries(MapTest 
+		PUBLIC
+			Map)
 
-target_link_libraries(MapTest 
-	PRIVATE 
-		Catch2::Catch2WithMain)
+	target_link_libraries(MapTest 
+		PRIVATE 
+			Catch2::Catch2WithMain)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(MapTest)
+	include(CTest)
+	include(Catch)
+	catch_discover_tests(MapTest)
+endif()
