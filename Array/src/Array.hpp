@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdexcept>
-#include <functional>
 #include <string>
 #include "Exception.hpp"
 
@@ -64,6 +63,38 @@ public:
     
     this->size = other.size;
   }
+
+  template<typename U, typename = std::enable_if_t<std::is_constructible<T, U>::value>>
+  Array<T>(const U* buf, size_t size)
+  {
+    if (size > ARRAY_MAX_SIZE)
+    {
+      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+    }
+    this->arr = new T[size]();
+    
+    for (size_t i = 0; i < size; i++)
+    {
+      arr[i]= U(buf[i]);
+    }
+    this->size = size;
+  }
+  
+  Array<T>(const std::initializer_list<T> init)
+  {
+    if (init.size() > ARRAY_MAX_SIZE)
+    {
+      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+    }
+    this->size = init.size();
+    this->arr = new T[this->size]();
+
+    size_t i = 0;
+    for (auto x : init)
+    {
+      this->arr[i++] = x;
+    }
+  }
   
   Array<T>& operator = (const Array<T>& other)
   {
@@ -92,16 +123,6 @@ public:
   ~Array<T>()
   {
     delete[] this->arr;
-  }
-
-  virtual T& operator[](int idx) final
-  {
-    return this->operator[]((size_t)idx);
-  }
-
-  const T& operator[](int idx) const
-  {
-    return this->operator[]((size_t)idx);
   }
 
   virtual T& operator[] (size_t idx) final
@@ -150,6 +171,47 @@ public:
 
   Array<size_t> find(const T& el) const;
 
+  bool has(const T& el) const
+  {
+    return (this->find(el).getSize() > 0);
+  }
+
+  bool hasAny(const Array<T>& el) const
+  {
+    for (int i = 0; i < el.getSize(); i++)
+    {
+      if (this->has(el[i]))
+        return true;
+    }
+    return false;
+  }
+  
+  bool hasAll(const Array<T>& el) const
+  {
+    for (int i = 0; i < el.getSize(); i++)
+    {
+      if (!this->has(el[i]))
+        return false;
+    }
+    return true;
+  }
+
+  void shiftLeft(const size_t num)
+  {
+    for (int i = num; i < this->size; i++)
+    {
+      this->operator[](i-num) = this->operator[](i);
+    }
+  }
+
+  void shiftRight(const size_t num)
+  {
+    for (int i = this->size - num; i > 0; i--)
+    {
+      this->operator[](i+num) = this->operator[](i);
+    }
+  }
+
   //ToDo: UnitTest
   virtual bool operator== (const Array<T>& other) const final
   {
@@ -189,6 +251,28 @@ public:
       }
     }
   }
+
+  template<typename func>
+  void foreach(const func&& f) const
+  {
+    for (size_t i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_v<func, const T&>)
+      {
+        f(this->operator[](i));
+      }
+      else if constexpr (std::is_invocable_v<func, const T&, size_t>)
+      {
+        f(this->operator[](i), i);
+      }
+      else
+      {
+        static_assert(std::is_invocable_v<func, const T&> || 
+                      std::is_invocable_v<func, const T&, size_t>, 
+                        "Function must have signature 'void(const T&)' or 'void(const T&, size_t)'!");
+      }
+    }
+  }
   
   template<typename func>
   bool all(const func&& f)
@@ -209,6 +293,31 @@ public:
       {
         static_assert(std::is_invocable_r_v<bool, func, T&> || 
                       std::is_invocable_r_v<bool, func, T&, size_t>, 
+                        "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }
+    }
+    return true;
+  }
+
+  template<typename func>
+  bool all(const func&& f) const
+  {
+    for (size_t i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, const T&>)
+      {
+        if (!f(this->operator[](i))) 
+          return false;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, const T&, size_t>)
+      {
+        if (!f(this->operator[](i), i)) 
+          return false;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, const T&> || 
+                      std::is_invocable_r_v<bool, func, const T&, size_t>, 
                         "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
       }
     }
@@ -235,6 +344,31 @@ public:
         static_assert(std::is_invocable_r_v<bool, func, T&> || 
                       std::is_invocable_r_v<bool, func, T&, size_t>, 
                         "Function must have signature 'bool(T&)' or 'bool(T&, size_t)'!");
+      }
+    }
+    return false;
+  }
+
+  template<typename func>
+  bool any(const func&& f) const
+  {
+    for (size_t i = 0; i < this->getSize(); i++)
+    {
+      if constexpr (std::is_invocable_r_v<bool, func, const T&>)
+      {
+        if (f(this->operator[](i))) 
+          return true;
+      }
+      else if constexpr (std::is_invocable_r_v<bool, func, const T&, size_t>)
+      {
+        if (f(this->operator[](i), i)) 
+          return true;
+      }
+      else
+      {
+        static_assert(std::is_invocable_r_v<bool, func, const T&> || 
+                      std::is_invocable_r_v<bool, func, const T&, size_t>, 
+                        "Function must have signature 'bool(const T&)' or 'bool(const T&, size_t)'!");
       }
     }
     return false;
@@ -635,3 +769,43 @@ static void foreach(DynamicArray<T> arr, func&& f)
     f(arr[i]);
   }
 }
+
+namespace std 
+{
+	template<typename T>
+	string to_string(const Array<T> arr)
+	{
+		string res = "{";
+		arr.foreach([&](const T& el)
+		{
+			res += to_string(el) + " ";
+		});
+		res += "}";
+		return res;
+	}
+
+	template<typename T>
+	string to_string(const Array<T> arr, size_t n)
+	{
+		string res = "{";
+		arr.foreach([&](const T& el, size_t i)
+		{
+			if (i < n)
+				res += to_string(el) + " ";
+		});
+		res += "}";
+		return res;
+	}
+
+  template<typename T>
+  string to_string(const DynamicArray<T>& arr)
+  {
+    string res = "{";
+    arr.foreach([&](const T& el)
+    {
+      res += to_string(el) + " ";
+    });
+    res += "}";
+    return res;
+  }
+};
