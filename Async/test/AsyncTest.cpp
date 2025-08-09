@@ -18,7 +18,7 @@ __async__ (int, func, int a, int b)
   std::cout << "[Async Task]  Recieved Arguments: a + b = " << std::to_string(a+b) << " ..." << std::endl;
   std::this_thread::sleep_for(std::chrono::seconds(a+b));
   std::cout << "[Async Task]  Done!" << std::endl;
-  return 0; 
+  return 100; 
 }
 
 TEST_CASE("Test Async", "[async]")
@@ -35,11 +35,12 @@ TEST_CASE("Test Async", "[async]")
           return 1;
         });
         
-        while(!res->isFinished())
-        {
-          std::this_thread::sleep_for(std::chrono::seconds(1));
+      std::cout << "[Main Thread] Doing something else..." << std::endl;
+      while(!res.isFinished())
+      {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
       };
-      REQUIRE(1 == res.get()->get());
+      REQUIRE(1 == res.get());
     }());
   }
   
@@ -59,11 +60,12 @@ TEST_CASE("Test Async", "[async]")
           return 1;
         });
   
-      while(!res->isFinished())
+      std::cout << "[Main Thread] Doing something else..." << std::endl;
+      while(!res.isFinished())
       {
           std::this_thread::sleep_for(std::chrono::seconds(1));
       };
-        REQUIRE(1 == res.get()->get());
+        REQUIRE(1 == res.get());
         REQUIRE(5 == var);
     }());
   }
@@ -91,9 +93,12 @@ TEST_CASE("Test Async", "[async]")
       throw std::logic_error("Test exception!");
       return 1;
     });
+
+    std::cout << "[Main Thread] Doing something else..." << std::endl;
+
     REQUIRE_THROWS_MATCHES
     (
-      res->get(), 
+      res.get(), 
       std::logic_error, 
       ExceptionMessageMatcher{}
     );
@@ -102,14 +107,19 @@ TEST_CASE("Test Async", "[async]")
   SECTION("__async__ macro creates working async functions", "[macro]")
   {
     auto res = func(1, 2);
-    while (!res->isFinished()) {};
 
-    REQUIRE(0 == res.get()->get());
+    std::cout << "[Main Thread] Doing something else..." << std::endl;
+
+    REQUIRE(100 == res.get());
   }
 
   SECTION("__async__ void functions will behave normally", "[void]")
   {
-    auto res = voidfunc(3);
-    REQUIRE_NOTHROW(res.get()->get());
+    REQUIRE_NOTHROW(voidfunc(3).get());
+  }
+
+  SECTION("__async__ functions are awaitable", "[await]")
+  {
+    REQUIRE(100 == __await__(func, 1, 2));
   }
 }

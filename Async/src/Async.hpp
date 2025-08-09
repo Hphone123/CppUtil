@@ -1,113 +1,162 @@
 #pragma once
 
 #include <exception>
-#include <functional>
-#include <future>
-#include <iostream>
 #include <memory>
-#include <shared_mutex>
 #include <thread>
+#include <condition_variable>
 
 namespace CppUtil
 {
+  struct AsyncState
+  {
+    std::exception_ptr      exc;
+
+    bool                    threw;
+    bool                    finished;
+
+    std::condition_variable cv;
+    std::mutex              mtx;
+  };
+
   template<typename T>
   class Promise 
   {
   private:
-    T                       value;
-    std::exception_ptr      exc;
+    
+    std::shared_ptr<AsyncState> state;
 
-    bool                    threw;
-    bool                    finished;
-
-    std::condition_variable cv;
-    std::mutex              mtx;
+    std::shared_ptr<T>          value;
 
   public:
-    void setValue(T v)
-    {
-      value = v;
-    };
 
-    void setExc(std::exception_ptr eptr)
-    {
-      threw = true;
-      exc = eptr;
-    };
-
-    void finish()
-    {
-      this->finished = true;
-      cv.notify_all();
-    }
+    Promise<T>(std::shared_ptr<AsyncState> state, std::shared_ptr<T> value):
+      state(state),
+      value(value)
+    {}
 
     bool isFinished()
     {
-      return finished;
+      return state->finished;
     }
 
     T get()
     {
-      std::unique_lock lock(mtx);
-      cv.wait(lock, [this]{return (this->finished);});
-      if (this->threw)
-        std::rethrow_exception(exc);
-      return this->value;
+      std::unique_lock<std::mutex> lock(state->mtx);
+      state->cv.wait(lock, [this]{return (state->finished);});
+      if (state->threw)
+        std::rethrow_exception(state->exc);
+      return *value;
+    }
+
+    operator T ()
+    {
+      return this->get();
     }
   };
 
   template<>
-  class Promise<void>
+  class Promise<void> 
   {
   private:
     
-    std::exception_ptr      exc;
-
-    bool                    threw;
-    bool                    finished;
-
-    std::condition_variable cv;
-    std::mutex              mtx;
+    std::shared_ptr<AsyncState>  state;
 
   public:
-    void setValue(void)
-    {
-      return;
-    };
 
-    void setExc(std::exception_ptr eptr)
-    {
-      threw = true;
-      exc = eptr;
-    };
-
-    void finish()
-    {
-      this->finished = true;
-      cv.notify_all();
-    }
+    Promise<void>(std::shared_ptr<AsyncState> state):
+      state(state)
+    {}
 
     bool isFinished()
     {
-      return finished;
+      return state->finished;
     }
 
     void get()
     {
-      std::unique_lock lock(mtx);
-      cv.wait(lock, [this]{return (this->finished);});
-      if (this->threw)
-        std::rethrow_exception(exc);
+      std::unique_lock<std::mutex> lock(state->mtx);
+      state->cv.wait(lock, [this]{return (state->finished);});
+      if (state->threw)
+        std::rethrow_exception(state->exc);
       return;
     }
+  };
 
+  template<typename T>
+  class Future
+  {
+  private:
+    
+    std::shared_ptr<AsyncState> state;
+
+    std::shared_ptr<T>          value; 
+
+  public:
+
+    Future<T>():
+      state(std::make_shared<AsyncState>()),
+      value(std::make_shared<T>())
+    {}
+    
+    CppUtil::Promise<T> asPromise()
+    {
+      return Promise<T>(state, value);
+    }
+
+    void setValue(T v)
+    {
+      *value = v;
+    }
+
+    void finish()
+    {
+      state->finished = true;
+      state->cv.notify_all();
+    }
+
+    void setThrow(std::exception_ptr v)
+    {
+      state->exc = v;
+      state->threw = true;
+    }
+  };
+
+  template<>
+  class Future<void>
+  {
+  private:
+    
+    std::shared_ptr<AsyncState> state;
+
+  public:
+
+    Future<void>():
+      state(std::make_shared<AsyncState>())
+    {}
+    
+    CppUtil::Promise<void> asPromise()
+    {
+      return Promise<void>(state);
+    }
+
+    void finish()
+    {
+      state->finished = true;
+      state->cv.notify_all();
+    }
+
+    void setThrow(std::exception_ptr v)
+    {
+      state->exc = v;
+      state->threw = true;
+    }
   };
 
   class Async 
   {
   private:
     template<typename T, typename F, typename... A>
-    static void _async(std::shared_ptr<Promise<T>> res, F f, A... a) 
+    static void _async(Future<T> res, F f, A... a) 
     {
       try 
       {
@@ -118,25 +167,25 @@ namespace CppUtil
         } 
         else 
         {
-          auto r = std::apply(f, a...);   // rvalue
-          res->setValue(std::move(r)); // move into promise
+          auto r = std::apply(f, a...);
+          res.setValue(std::move(r));
         }
       } 
       catch (...) 
       {
-        res->setExc(std::current_exception());
+        res.setThrow(std::current_exception());
       }
-      res->finish();
+      res.finish();
     }
 
   public:
     template<typename T, typename Func, typename... Args>
-    static std::shared_ptr<Promise<T>> async(Func&& f, Args&&... a) 
+    static Promise<T> async(Func&& f, Args&&... a) 
     {
       static_assert(std::is_invocable_r_v<T, Func, Args...>,
                     "Async function must return T and accept the given arguments!");
 
-      auto res  = std::make_shared<Promise<T>>();
+      auto res  = Future<T>();
 
       using Fn  = std::decay_t<Func>;
       using Tup = std::tuple<std::decay_t<Args>...>;
@@ -149,20 +198,26 @@ namespace CppUtil
                 _async<T>(res, std::move(fn), std::move(args));
             }
         ).detach();
-      return res;
+      return res.asPromise();
     }
   };
 
+  /* Declares an async function
+   * Will return Promise<ret_type>
+   */
   #define __async__(ret_type, func_name, ...)                                                                                   \
     ret_type _##func_name(__VA_ARGS__);                                                                                         \
     template<typename... Args>                                                                                                  \
-    std::shared_ptr<CppUtil::Promise<ret_type>> func_name(Args&&... a)                                                          \
+    CppUtil::Promise<ret_type> func_name(Args&&... a)                                                                           \
     {                                                                                                                           \
       static_assert(std::is_invocable_r_v<ret_type, decltype(_##func_name), Args...>,                                           \
         "Async function must be callable with given args!");                                                                    \
       return CppUtil::Async::async<ret_type>(_##func_name, a...);                                                               \
     }                                                                                                                           \
     ret_type _##func_name(__VA_ARGS__)
+
+  #define __await__(func_name, ...)                                                                                             \
+    func_name(__VA_ARGS__).get()
     
 }
 
