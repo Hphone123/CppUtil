@@ -56,6 +56,53 @@ namespace CppUtil
     }
   };
 
+  template<>
+  class Promise<void>
+  {
+  private:
+    
+    std::exception_ptr      exc;
+
+    bool                    threw;
+    bool                    finished;
+
+    std::condition_variable cv;
+    std::mutex              mtx;
+
+  public:
+    void setValue(void)
+    {
+      return;
+    };
+
+    void setExc(std::exception_ptr eptr)
+    {
+      threw = true;
+      exc = eptr;
+    };
+
+    void finish()
+    {
+      this->finished = true;
+      cv.notify_all();
+    }
+
+    bool isFinished()
+    {
+      return finished;
+    }
+
+    void get()
+    {
+      std::unique_lock lock(mtx);
+      cv.wait(lock, [this]{return (this->finished);});
+      if (this->threw)
+        std::rethrow_exception(exc);
+      return;
+    }
+
+  };
+
   class Async 
   {
   private:
@@ -96,8 +143,7 @@ namespace CppUtil
 
       auto fn   = Fn (std::forward<Func>(f));
       auto args = Tup(std::forward<Args>(a)...);
-
-      // Prefer lambda to avoid function-pointer template headaches:
+      
       std::thread(
             [res, fn = std::move(fn), args = std::move(args)]() mutable {
                 _async<T>(res, std::move(fn), std::move(args));
@@ -106,6 +152,18 @@ namespace CppUtil
       return res;
     }
   };
+
+  #define __async__(ret_type, func_name, ...)                                                                                   \
+    ret_type _##func_name(__VA_ARGS__);                                                                                         \
+    template<typename... Args>                                                                                                  \
+    std::shared_ptr<CppUtil::Promise<ret_type>> func_name(Args&&... a)                                                          \
+    {                                                                                                                           \
+      static_assert(std::is_invocable_r_v<ret_type, decltype(_##func_name), Args...>,                                           \
+        "Async function must be callable with given args!");                                                                    \
+      return CppUtil::Async::async<ret_type>(_##func_name, a...);                                                               \
+    }                                                                                                                           \
+    ret_type _##func_name(__VA_ARGS__)
     
 }
+
 
