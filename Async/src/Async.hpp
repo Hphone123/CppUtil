@@ -202,18 +202,20 @@ namespace CppUtil
     }
   };
 
-  /* Declares an async function
-   * Will return Promise<ret_type>
-   */
   #define __async__(ret_type, func_name, ...)                                                                                   \
+    template<typename... Args>                                                                                                  \
+    CppUtil::Promise<ret_type> func_name(Args&&... a);                                                                          \
+                                                                                                                                \
     ret_type _##func_name(__VA_ARGS__);                                                                                         \
+                                                                                                                                \
     template<typename... Args>                                                                                                  \
     CppUtil::Promise<ret_type> func_name(Args&&... a)                                                                           \
     {                                                                                                                           \
       static_assert(std::is_invocable_r_v<ret_type, decltype(_##func_name), Args...>,                                           \
-        "Async function must be callable with given args!");                                                                    \
+        "'"#func_name "' has signature: '"#ret_type "(" #__VA_ARGS__ ")'!");                                                    \
       return CppUtil::Async::async<ret_type>(_##func_name, a...);                                                               \
     }                                                                                                                           \
+                                                                                                                                \
     ret_type _##func_name(__VA_ARGS__)
 
   #define __await__(func_name, ...)                                                                                             \
