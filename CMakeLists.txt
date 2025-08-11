@@ -6,6 +6,8 @@ option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
 option(CREATE_PCH "Create PCH's for all headers" ON)
 option(BUILD_TESTS "Create test executables" ON)
 
+set (CMAKE_BUILD_TYPE Debug)
+
 if(ALLOW_TEST_FAIL)
   set(TEST_FAILSAFE || echo Continue...\n)
 endif()
@@ -39,6 +41,11 @@ endif()
 add_subdirectory(Map)
 if (RUN_TESTS_AFTER_BUILD)
 	add_custom_target(RunMapTest 						ALL COMMENT "Running tests for 'Map'"							DEPENDS MapTest							COMMAND ./Map/MapTest ${TEST_FAILSAFE})
+endif()
+
+add_subdirectory(Async)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunAsyncTest					ALL COMMENT "Running tests for 'Async'"							DEPENDS AsyncTest						COMMAND ./Async/AsyncTest ${TEST_FAILSAFE})
 endif()
 
 add_subdirectory(Exception)
