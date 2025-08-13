@@ -1,9 +1,11 @@
 #pragma once
 
 #include <exception>
+#include <future>
 #include <memory>
 #include <thread>
 #include <condition_variable>
+#include <type_traits>
 
 namespace CppUtil
 {
@@ -202,25 +204,50 @@ namespace CppUtil
     }
   };
 
-  #define __async__(ret_type, func_name, ...)                                                                                   \
-    template<typename... Args>                                                                                                  \
-    CppUtil::Promise<ret_type> func_name(Args&&... a);                                                                          \
-                                                                                                                                \
-    ret_type _##func_name(__VA_ARGS__);                                                                                         \
-                                                                                                                                \
-    template<typename... Args>                                                                                                  \
-    CppUtil::Promise<ret_type> func_name(Args&&... a)                                                                           \
-    {                                                                                                                           \
-      static_assert(std::is_invocable_r_v<ret_type, decltype(_##func_name), Args...>,                                           \
-        "'"#func_name "' has signature: '"#ret_type "(" #__VA_ARGS__ ")'!");                                                    \
-      return CppUtil::Async::async<ret_type>(_##func_name, a...);                                                               \
-    }                                                                                                                           \
-                                                                                                                                \
-    ret_type _##func_name(__VA_ARGS__)
+  // Declare and define an async function.
+  // Will also create a function nanmed __async__func_name
+  // Only works outside classes.
+  #define __async__(ret_type, func_name, ...)                                                                                                   \
+    ret_type __async__##func_name(__VA_ARGS__);                                                                                                 \
+                                                                                                                                                \
+    template<typename... Args>                                                                                                                  \
+    CppUtil::Promise<ret_type> func_name (Args&&... a)                                                                                          \
+    {                                                                                                                                           \
+      static_assert(std::is_invocable_r_v<ret_type, decltype(__async__##func_name), a>,                                                         \
+        "Function " #func_name " has signature " #ret_type "(" #__VA_ARGS__ ")");                                                               \
+      return CppUtil::Async::async<ret_type>(__async__##func_name, a);                                                                          \
+    }                                                                                                                                           \
+                                                                                                                                                \
+    ret_type __async__##func_name(__VA_ARGS__)
 
-  #define __await__(func_name, ...)                                                                                             \
+  // Declare an async member function.
+  // Will also declare a private a private member function named `__async__func_name`
+  // implementation must be outside of class body, or in another file.
+  // Inline implementations must be done by hand.
+  // Only works inside a class body.
+  #define __async_member_decl__(ret_type, func_name, ...)                                                                                       \
+    private:                                                                                                                                    \
+      ret_type __async__##func_name(__VA_ARGS__);                                                                                               \
+                                                                                                                                                \
+    public:                                                                                                                                     \
+                                                                                                                                                \
+      template<typename... Args>                                                                                                                \
+      CppUtil::Promise<ret_type> func_name(Args&&... a)                                                                                         \
+      {                                                                                                                                         \
+        using Self = std::remove_reference_t<decltype(*this)>;                                                                                  \
+        static_assert(std::is_invocable_v<decltype(&Self::__async__##func_name), Self&, Args...>,                                               \
+          "Function: "  #ret_type " " #func_name "(" #__VA_ARGS__ ") is not invocable with given arguments; see compiler log for more info!");  \
+        return CppUtil::Async::async<ret_type>([this](Args&&... a) -> ret_type{return this->__async__##func_name(a...);}, a...);                \
+      }                                                                                                                         
+
+  // Implementation of an async function
+  // Must be placed outside the classes body.
+  #define __async_member_impl__(ret_type, class_name, func_name, ...)                                                                           \
+    ret_type class_name :: __async__##func_name(__VA_ARGS__)
+
+  // Call the async function and await its return
+  #define __await__(func_name, ...)                                                                                                             \
     func_name(__VA_ARGS__).get()
-    
 }
 
 
