@@ -19,7 +19,7 @@ jobs:
     env:
       CTEST_OUTPUT_ON_FAILURE: 1
       CMAKE_BUILD_PARALLEL_LEVEL: 4
-      VCPKG_ROOT: ${{ runner.temp }}/vcpkg
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_FEATURE_FLAGS: manifests # ensure manifest mode is on
 
