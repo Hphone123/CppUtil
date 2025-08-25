@@ -57,13 +57,13 @@ jobs:
       - name: Configure (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          cmake -DRUN_TESTS_AFTER_BUILD=OFF -S . -B . -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Configure (Windows, MSVC)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cmake -DRUN_TESTS_AFTER_BUILD=OFF -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
           # Note: MSVC is multi-config; build type is chosen at build/ctest time.
 
       # ---------- Build ----------
