@@ -82,10 +82,12 @@ jobs:
       - name: Test (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          ctest --output-on-failure -j 2
+          ctest -N
+
+          ctest --output-on-failure
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          ctest -C ${{ matrix.build_type }} --output-on-failure -j 2
+          ctest -C ${{ matrix.build_type }} --output-on-failure
