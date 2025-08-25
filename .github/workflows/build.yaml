@@ -29,37 +29,42 @@ jobs:
         
       # ---------- Get vcpkg ----------
       - name: Clone vcpkg
+        if: runner.os == 'Windows'
         run: git clone --depth 1 https://github.com/microsoft/vcpkg "${env:VCPKG_ROOT}"
 
-      - name: Bootstrap vcpkg (Linux/macOS)
+      - name: Clone vcpkg
+        if: runner.os != 'Windows'
+        run: git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+
+      - name: Bootstrap vcpkg
         if: runner.os != 'Windows'
         run: $VCPKG_ROOT/bootstrap-vcpkg.sh
 
-      - name: Bootstrap vcpkg (Windows)
+      - name: Bootstrap vcpkg
         if: runner.os == 'Windows'
         shell: pwsh
         run: '& "$env:VCPKG_ROOT\bootstrap-vcpkg.bat"'
 
       # ---------- Get Ninja ----------
-      - name: Install Ninja (Linux)
+      - name: Install Ninja
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build
 
-      - name: Install Ninja (macOS)
+      - name: Install Ninja
         if: runner.os == 'macOS'
         run: |
           brew update
           brew install ninja
 
       # ---------- Configure ----------
-      - name: Configure (Linux/macOS)
+      - name: Configure
         if: runner.os != 'Windows'
         run: |
           cmake -DRUN_TESTS_AFTER_BUILD=OFF . -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
-      - name: Configure (Windows, MSVC)
+      - name: Configure
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -67,26 +72,26 @@ jobs:
           # Note: MSVC is multi-config; build type is chosen at build/ctest time.
 
       # ---------- Build ----------
-      - name: Build (Linux/macOS)
+      - name: Build
         if: runner.os != 'Windows'
         run: |
           cmake --build . --parallel
 
-      - name: Build (Windows)
+      - name: Build
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cmake --build . --config ${{ matrix.build_type }} --parallel
 
       # ---------- Test (CTest discovers Catch2 tests if you used add_test/catch_discover_tests) ----------
-      - name: Test (Linux/macOS)
+      - name: Test
         if: runner.os != 'Windows'
         run: |
           ctest -N
           cat CTestTestfile.cmake
           ctest --output-on-failure
 
-      - name: Test (Windows)
+      - name: Test
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
