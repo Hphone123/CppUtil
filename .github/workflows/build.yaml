@@ -1,0 +1,75 @@
+name: CMake Build & Test
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} • ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Debug, Release]
+
+    env:
+      CTEST_OUTPUT_ON_FAILURE: 1
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------- Tools / dependencies ----------
+      - name: Install Ninja (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install ninja
+
+      # ---------- Configure ----------
+      - name: Configure (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cmake -DRUN_TESTS_AFTER_BUILD -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Configure (Windows, MSVC)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF -S . -B build -G "Visual Studio 17 2022" -A x64
+          # Note: MSVC is multi-config; build type is chosen at build/ctest time.
+
+      # ---------- Build ----------
+      - name: Build (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cmake --build build --parallel
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      # ---------- Test (CTest discovers Catch2 tests if you used add_test/catch_discover_tests) ----------
+      - name: Test (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          ctest --test-dir build --output-on-failure -j 2
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure -j 2
