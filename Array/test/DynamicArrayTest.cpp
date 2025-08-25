@@ -1,10 +1,4 @@
-#if defined(CATCH_VERSION_MAJOR) && CATCH_VERSION_MAJOR >= 3
-  // Catch2 v3 headers
-  #include <catch2/catch_all.hpp>
-#else
-  // Assume v2
-  #include <catch2/catch.hpp>
-#endif
+#include "../../CatchVer/CatchVer.hpp"
 #include <stdexcept>
 
 #define UNIT_TEST 1
