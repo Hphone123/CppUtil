@@ -28,5 +28,5 @@ if (CREATE_PCH)
 endif()
 
 target_include_directories(Exception 
-	PUBLIC 
+	INTERFACE 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
