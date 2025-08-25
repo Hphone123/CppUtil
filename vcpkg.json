@@ -2,7 +2,7 @@
   "dependencies": [
     {
       "name": "catch2",
-      "version": "2.13.10"
+      "version>=": "2.13.10"
     }
   ]
 }
