@@ -82,10 +82,10 @@ jobs:
       - name: Test (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          ctest --test-dir build --output-on-failure -j 2
+          ctest --output-on-failure -j 2
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure -j 2
+          ctest -C ${{ matrix.build_type }} --output-on-failure -j 2
