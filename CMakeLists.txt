@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(CppUtil VERSION 0.1.0)
 
-include(CTest)
-
 option(ALLOW_TEST_FAIL "Allow tests to fail, but still continue the build" OFF)
 option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
 option(CREATE_PCH "Create PCH's for all headers" ON)
