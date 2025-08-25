@@ -23,8 +23,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
+      # ---------- Get vcpkg ----------
+      - name: Clone vcpkg
+        run: git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
 
-      # ---------- Tools / dependencies ----------
+      - name: Bootstrap vcpkg (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: $VCPKG_ROOT/bootstrap-vcpkg.sh
+
+      - name: Bootstrap vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '& "$env:VCPKG_ROOT\bootstrap-vcpkg.bat"'
+
+      # ---------- Get Ninja ----------
       - name: Install Ninja (Linux)
         if: runner.os == 'Linux'
         run: |
