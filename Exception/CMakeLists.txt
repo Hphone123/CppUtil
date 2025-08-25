@@ -16,7 +16,7 @@ if (BUILD_TESTS)
 endif()
 
 add_library(Exception 
-	STATIC 
+	INTERFACE 
 		src/Exception.hpp)
 		
 set_target_properties(Exception 
