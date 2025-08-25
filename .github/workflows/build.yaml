@@ -83,7 +83,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           ctest -N
-
+          cat CTestTestfile.cmake
           ctest --output-on-failure
 
       - name: Test (Windows)
