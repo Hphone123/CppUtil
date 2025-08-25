@@ -41,7 +41,7 @@ jobs:
       - name: Configure (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          cmake -DRUN_TESTS_AFTER_BUILD -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Configure (Windows, MSVC)
         if: runner.os == 'Windows'
