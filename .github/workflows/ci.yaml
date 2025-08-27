@@ -1,4 +1,4 @@
-name: CMake Build & Test
+name: CI
 
 on:
   push:
@@ -194,7 +194,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          lcov --capture --directory . --output-file coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -234,7 +234,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          lcov --capture --directory . --output-file coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
 
       - name: Download base coverage report
         uses: actions/download-artifact@v4
