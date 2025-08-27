@@ -17,7 +17,6 @@ jobs:
         build_type: [Debug, Release]
 
     env:
-      CTEST_OUTPUT_ON_FAILURE: 1
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
@@ -89,6 +88,15 @@ jobs:
     name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
     needs: build
     runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Debug, Release]
+
+    env:
+      CTEST_OUTPUT_ON_FAILURE: 1
+
     steps:
       - uses: actions/checkout@v4
 
