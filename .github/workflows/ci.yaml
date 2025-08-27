@@ -49,7 +49,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build
+          sudo apt-get install -y ninja-build tree
 
       - name: Install Ninja
         if: runner.os == 'macOS'
@@ -76,6 +76,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cmake --build . --parallel
+          tree .
 
       - name: Build
         if: runner.os == 'Windows'
@@ -84,6 +85,7 @@ jobs:
           $VCPKG_ROOT=${env:VCPKG_ROOT}
           cmake --build . --config ${{ matrix.build_type }}
 
+      # ---------- Upload binaries ----------
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -109,12 +111,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ---------- Download binaries ----------
       - name: Fetch build artifacts
         uses: actions/download-artifact@v4
         with:
           name: cpp-binaries
           path: ./build
 
+      # ---------- Run tests ----------
       - name: Run tests
         if: runner.os != 'Windows'
         run: |
