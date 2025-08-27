@@ -83,7 +83,7 @@ jobs:
         shell: pwsh
         run: |
           $VCPKG_ROOT=${env:VCPKG_ROOT}
-          cmake --build . --config ${{ matrix.build_type }} --ta
+          cmake --build . --config ${{ matrix.build_type }}
 
       # ---------- Test (CTest discovers Catch2 tests if you used add_test/catch_discover_tests) ----------
       - name: Test
