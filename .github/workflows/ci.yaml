@@ -135,35 +135,9 @@ jobs:
         run: |
           ctest -C ${{ matrix.build_type }} --test-dir build --output-on-failure
 
-      # Comment
-      - name: Install coverage dependencies
-        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
-        run: |
-          sudo apt-get update 
-          sudo apt-get install -y lcov python3
-      
-      # ---------- Setup python ----------
-      - name: Set up python
-        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
-        run: |
-          pipx install gcovr
-
-      - name: Get coverage report
-        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
-        run: |
-          mkdir -p coverage
-          gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
-
-      - name: Upload coverage report
-        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage (ubuntu)
-          path: coverage/lcov.info
-
   coverage:
     name: Check coverage
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -171,8 +145,24 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: coverage (ubuntu)
-          path: ./coverage
+          name: cpp-binaries (ubuntu-latest - Debug)
+          path: ./build
+
+      # Comment
+      - name: Install coverage dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y lcov python3
+          pipx install gcovr
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build
+
+      - name: Get coverage report
+        run: |
+          mkdir -p coverage
+          gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
 
       - name: Barecheck report
         uses: barecheck/code-coverage-action@v1
