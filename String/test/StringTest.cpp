@@ -124,3 +124,20 @@ TEST_CASE("String Remove Element", "[string][remove]")
     REQUIRE(s3 == "Hello");
   }
 }
+
+TEST_CASE("String Insert Element", "[string][insert]")
+{
+  String s1 = "Hell", s2 = "o World", s3 = "Hellorld";
+
+  SECTION("Strings can be appended")
+  {
+    s1.insert("o", 4);
+    REQUIRE(s1 == "Hello");
+  }
+
+  SECTION("Strings can be inserted")
+  {
+    s3.insert("o W", 4);
+    REQUIRE(s3 == "Hello World");
+  }
+}
