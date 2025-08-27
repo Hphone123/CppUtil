@@ -135,6 +135,56 @@ jobs:
         run: |
           ctest -C ${{ matrix.build_type }} --test-dir build --output-on-failure
 
+  base_coverage:
+    name: Get base code coverage
+    runs-on: ubuntu-latest
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_TRIPLET: ubuntu-x64
+      VCPKG_FEATURE_FLAGS: manifests
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up vcpkg
+        run: |
+          git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+          $VCPKG_ROOT/bootstrap-vcpkg.sh
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y lcov python3 ninja-build
+          pipx install gcovr
+
+      - name: Configure
+        run: |
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -B build -G Ninja -DCHECK_COVERAGE=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      - name: Get coverage report
+        run: |
+          mkdir -p coverage
+          gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage (ubuntu base)
+          path: coverage/lcov.info
+
+  
   coverage:
     name: Check coverage
     needs: build
@@ -169,11 +219,18 @@ jobs:
           mkdir -p coverage
           gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
 
+      - name: Download base coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage (ubuntu base)
+          path: ./
+
       - name: Barecheck report
         uses: barecheck/code-coverage-action@v1
         with:
           barecheck-github-app-token: ${{ secrets.BARECHECK_GITHUB_APP_TOKEN }}
           lcov-file: "./coverage/lcov.info"
+          base-lcov-file: "./lcov.info"
           send-summary-comment: true
           show-annotations: "warning"
-          minimum-ratio: 0
+          minimum-ratio: 1
