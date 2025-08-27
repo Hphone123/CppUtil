@@ -1,7 +1,7 @@
-#include "CatchVer.hpp"
 #include <stdexcept>
 
 #include "Array.hpp"
+#include "CatchVer.hpp"
 
 TEST_CASE("ResizableArray Resize", "[resizable_array][resize]")
 {
@@ -21,7 +21,7 @@ TEST_CASE("ResizableArray Resize", "[resizable_array][resize]")
     REQUIRE_NOTHROW(arr[8] = 9);
     REQUIRE_NOTHROW(arr[9] = 10);
   }
-  
+
   SECTION("ResizableArray can be sized to the same size")
   {
     REQUIRE_NOTHROW(arr.resize(arr.getSize()));

@@ -7,9 +7,28 @@ on:
     branches: [ "**" ]
 
 jobs:
+  lint:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt update
+          sudo apt install -y clang-format
+      
+      - name: Check code formatting
+        run: |
+          set -e
+          clang-format -style=file -i $(git ls-files '*.c' '*.cc' '*.cxx' '*.cpp' '*.h' '*.hh' '*.hpp')
+          git diff --exit-code
+
   build:
     name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
+    needs: lint
     strategy:
       fail-fast: false
       matrix:

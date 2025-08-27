@@ -1,0 +1,62 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++17
+
+# Indentation & spacing
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ContinuationIndentWidth: 2
+AccessModifierOffset: -2
+IndentCaseLabels: true
+NamespaceIndentation: None
+
+# Braces & short statements
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Function/call spacing
+SpaceBeforeParens: ControlStatements      # keep `if (`/`for (` spaced, no space for calls/defs
+SpacesInParentheses: false
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpaceBeforeRangeBasedForLoopColon: true
+
+# Pointers / references
+PointerAlignment: Middle                  # e.g. `const char * str`
+ReferenceAlignment: Left                  # e.g. `const T& t`
+
+# Operators & alignment
+AlignOperands: true
+AlignTrailingComments: false
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: false
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<.*>$'     # system headers
+    Priority: 1
+  - Regex: '^".*"$'     # project headers
+    Priority: 2
+
+# Constructor initializer lists
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+SpaceBeforeCtorInitializerColon: true
+
+# Line length & empties
+ColumnLimit: 120
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# Comments
+ReflowComments: false
+
+# Misc
+SortUsingDeclarations: true
+DerivePointerAlignment: false
