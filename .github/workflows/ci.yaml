@@ -144,7 +144,6 @@ jobs:
       
       # ---------- Setup python ----------
       - name: Set up python
-        uses: actions/setup-python@v5
         if: runner.os == 'Ubuntu'
         run: |
           pipx install gcovr
