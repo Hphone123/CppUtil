@@ -158,8 +158,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update 
-          sudo apt-get install -y lcov python3 ninja-build
-          pipx install gcovr
+          sudo apt-get install -y lcov ninja-build
 
       - name: Configure
         run: |
@@ -176,7 +175,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -202,8 +201,7 @@ jobs:
       - name: Install coverage dependencies
         run: |
           sudo apt-get update 
-          sudo apt-get install -y lcov python3
-          pipx install gcovr
+          sudo apt-get install -y lcov
 
       - name: Set properties
         run: |
@@ -217,7 +215,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info
 
       - name: Download base coverage report
         uses: actions/download-artifact@v4
