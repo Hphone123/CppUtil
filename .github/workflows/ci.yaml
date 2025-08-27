@@ -14,15 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install clang-format
+      - name: Install clang-format 14
         run: |
           sudo apt update
-          sudo apt install -y clang-format
+          sudo apt install -y clang-format-14
       
       - name: Check code formatting
         run: |
           set -e
-          clang-format -style=file -i $(git ls-files '*.c' '*.cc' '*.cxx' '*.cpp' '*.h' '*.hh' '*.hpp')
+          clang-format-14 -style=file -i $(git ls-files '*.c' '*.cc' '*.cxx' '*.cpp' '*.h' '*.hh' '*.hpp')
           git diff --exit-code
 
   build:
