@@ -213,15 +213,15 @@ namespace CppUtil
     template<typename... Args>                                                                                                                  \
     CppUtil::Promise<ret_type> func_name (Args&&... a)                                                                                          \
     {                                                                                                                                           \
-      static_assert(std::is_invocable_r_v<ret_type, decltype(__async__##func_name), a>,                                                         \
+      static_assert(std::is_invocable_r_v<ret_type, decltype(__async__##func_name), Args...>,                                                   \
         "Function " #func_name " has signature " #ret_type "(" #__VA_ARGS__ ")");                                                               \
-      return CppUtil::Async::async<ret_type>(__async__##func_name, a);                                                                          \
+      return CppUtil::Async::async<ret_type>(__async__##func_name, a...);                                                                       \
     }                                                                                                                                           \
                                                                                                                                                 \
     ret_type __async__##func_name(__VA_ARGS__)
 
   // Declare an async member function.
-  // Will also declare a private a private member function named `__async__func_name`
+  // Will also declare a private member function named `__async__func_name`
   // implementation must be outside of class body, or in another file.
   // Inline implementations must be done by hand.
   // Only works inside a class body.

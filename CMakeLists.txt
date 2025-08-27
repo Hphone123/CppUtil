@@ -51,5 +51,5 @@ if (RUN_TESTS_AFTER_BUILD)
 endif()
 
 add_subdirectory(Exception)
-
+add_subdirectory(CatchVer)
 

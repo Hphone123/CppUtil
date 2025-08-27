@@ -47,6 +47,10 @@ if (BUILD_TESTS)
 	target_link_libraries(ArrayTest 				 PRIVATE Catch2::Catch2WithMain)
 	target_link_libraries(ResizableArrayTest PRIVATE Catch2::Catch2WithMain)
 	target_link_libraries(DynamicArrayTest   PRIVATE Catch2::Catch2WithMain)
+	
+	target_link_libraries(ArrayTest  				 PRIVATE CatchVer)
+	target_link_libraries(ResizableArrayTest PRIVATE CatchVer)
+	target_link_libraries(DynamicArrayTest   PRIVATE CatchVer)
 
 	include(CTest)
 	include(Catch)

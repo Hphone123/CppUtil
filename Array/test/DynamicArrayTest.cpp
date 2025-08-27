@@ -1,4 +1,4 @@
-#include "../../CatchVer/CatchVer.hpp"
+#include "CatchVer.hpp"
 #include <stdexcept>
 
 #define UNIT_TEST 1

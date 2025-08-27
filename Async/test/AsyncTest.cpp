@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include "CatchVer.hpp"
 #include <iostream>
 #include <stdexcept>
 

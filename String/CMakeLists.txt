@@ -47,6 +47,9 @@ if (BUILD_TESTS)
 	target_link_libraries(StringTest 
 		PRIVATE 
 			Catch2::Catch2WithMain)
+	target_link_libraries (StringTest  
+		PRIVATE 
+			CatchVer)
 
 	include(CTest)
 	include(Catch)
