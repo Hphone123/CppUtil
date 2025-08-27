@@ -119,8 +119,8 @@ jobs:
 
       # ---------- Set executable property ----------
       - name: Set properties
-        if: ${{ matrix.os }} != 'Windows'
-        run: \
+        if: runner.os != 'Windows'
+        run: /
           chmod -R +x build/*
           chmod -R +x build/**/*
 
