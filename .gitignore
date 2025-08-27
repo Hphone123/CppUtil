@@ -13,6 +13,16 @@ Testing
 **/*Test
 *.a
 
+# Ninja Files
+.ninja_*
+*.ninja
+
+#logs
+*.log
+
+# VCPKG installation files
+vcpkg_installed
+
 # Dart Config (Fro some reason)
 *.tcl
 

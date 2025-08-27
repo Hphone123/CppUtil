@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include "../../CatchVer/CatchVer.hpp"
 #include <stdexcept>
 
 #include "Array.hpp"

@@ -57,16 +57,27 @@ public:
     return true;
   }
 
-  bool operator== (const char * other)
+  bool operator!= (const String& other) const
+  {
+    return !(this->operator==(other));
+  }
+  
+  bool operator== (const char * other) const
   {
     if (strlen(other) + 1 != this->size)
       return false;
+      
     for (size_t i = 0; i < this->size; i++)
     {
       if (this->operator[](i) != other[i])
-        return false;
+      return false;
     }
     return true;
+  }
+
+  bool operator!= (const char * other) const
+  {
+    return !(this->operator==(other));
   }
 
   size_t length () const
