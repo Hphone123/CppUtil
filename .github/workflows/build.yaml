@@ -84,6 +84,15 @@ jobs:
           $VCPKG_ROOT=${env:VCPKG_ROOT}
           cmake --build . --config ${{ matrix.build_type }}
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-binaries
+          path: |
+            build/**
+          if-no-files-found: error
+          retention-days: 7
+
   test:
     name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
     needs: build
@@ -103,8 +112,8 @@ jobs:
       - name: Fetch build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: web-dist
-          path: ./dist
+          name: cpp-binaries
+          path: ./build
 
       - name: Run tests
         if: runner.os != 'Windows'
@@ -116,9 +125,3 @@ jobs:
         shell: pwsh
         run: |
           ctest -C ${{ matrix.build_type }} --output-on-failure
-
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: coverage/**
