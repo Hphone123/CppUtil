@@ -1,3 +1,5 @@
+[![CMake Build & Test](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml)
+
 # CppUtil
 
 A hobby project implementing some utility functions and classes in c++.

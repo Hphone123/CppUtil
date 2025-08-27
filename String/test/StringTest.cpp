@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include "../../CatchVer/CatchVer.hpp"
 
 #include "String.hpp"
 
@@ -40,7 +40,7 @@ TEST_CASE("String concat", "[string][concat]")
 
   SECTION("Two strings can be concatenated with string constants")
   {
-    REQUIRE((s1 + " " + s2 + "!") == "Hello World");
+    REQUIRE((s1 + " " + s2 + "!") == "Hello World!");
   }
   
   SECTION("A String can be concatenated with an empty string constant")

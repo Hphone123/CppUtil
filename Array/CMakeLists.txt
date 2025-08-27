@@ -16,11 +16,11 @@ if (BUILD_TESTS)
 endif()
 
 add_library(Array 
-	STATIC 
+	INTERFACE 
 		src/Array.hpp)
 
 target_link_libraries(Array
-	PUBLIC
+	INTERFACE
 		Exception)
 
 set_target_properties(Array 
@@ -28,7 +28,7 @@ set_target_properties(Array
 		LINKER_LANGUAGE CXX)
 
 target_include_directories(Array 
-	PUBLIC 
+	INTERFACE 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (CREATE_PCH)

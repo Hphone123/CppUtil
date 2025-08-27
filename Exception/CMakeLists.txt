@@ -16,7 +16,7 @@ if (BUILD_TESTS)
 endif()
 
 add_library(Exception 
-	STATIC 
+	INTERFACE 
 		src/Exception.hpp)
 		
 set_target_properties(Exception 
@@ -28,5 +28,5 @@ if (CREATE_PCH)
 endif()
 
 target_include_directories(Exception 
-	PUBLIC 
+	INTERFACE 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)

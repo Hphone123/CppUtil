@@ -12,6 +12,8 @@ endif()
 
 if (NOT BUILD_TESTS)
 	set(RUN_TESTS_AFTER_BUILD OFF)
+else()
+	enable_testing()
 endif()
 
 set (CMAKE_CXX_STANDARD 14)

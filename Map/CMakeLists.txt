@@ -18,21 +18,22 @@ endif()
 
 # Add lib
 
-add_library(Map STATIC 
-	src/Map.hpp
-	)
+add_library(Map 
+	INTERFACE 
+		src/Map.hpp
+)
 
 # Link Array Header
 
 target_link_libraries(Map 
-	PUBLIC 
+	INTERFACE 
 		Array
 		Exception)
 
 # Set Properties
 
 target_include_directories(Map 
-	PUBLIC 
+	INTERFACE 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set_target_properties(Map 
