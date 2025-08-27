@@ -95,7 +95,7 @@ jobs:
           retention-days: 7
 
   test:
-    name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
+    name: Test ${{ matrix.os }} - ${{ matrix.build_type }}
     needs: build
     runs-on: ${{ matrix.os }}
     strategy:
@@ -116,6 +116,13 @@ jobs:
         with:
           name: cpp-binaries (${{ matrix.os }} - ${{ matrix.build_type }}) 
           path: ./build
+
+      # ---------- Set executable property ----------
+      - name: Set properties
+        if: ${{ matrix.os }} != 'Windows'
+        run: \
+          chmod -R +x build/*
+          chmod -R +x build/**/*
 
       # ---------- Run tests ----------
       - name: Run tests
