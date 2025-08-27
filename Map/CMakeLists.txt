@@ -55,6 +55,9 @@ if (BUILD_TESTS)
 	target_link_libraries(MapTest 
 		PRIVATE 
 			Catch2::Catch2WithMain)
+	target_link_libraries (MapTest  
+		PRIVATE 
+			CatchVer)
 
 	include(CTest)
 	include(Catch)

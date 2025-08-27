@@ -18,11 +18,11 @@ endif()
 find_package(Threads REQUIRED)
 
 add_library(Async 
-	STATIC 
+	INTERFACE 
 		src/Async.hpp)
 
 target_link_libraries(Async
-	PRIVATE
+	INTERFACE
 		Threads::Threads
 )
 
@@ -31,7 +31,7 @@ set_target_properties(Async
 		LINKER_LANGUAGE CXX)
 
 target_include_directories(Async 
-	PUBLIC 
+	INTERFACE 
 		${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (CREATE_PCH)
@@ -44,6 +44,7 @@ if (BUILD_TESTS)
 	target_link_libraries	(AsyncTest	PUBLIC	Async)
 
 	target_link_libraries	(AsyncTest	PRIVATE Catch2::Catch2WithMain)
+	target_link_libraries (AsyncTest  PRIVATE CatchVer)
 
 	include(CTest)
 	include(Catch)
