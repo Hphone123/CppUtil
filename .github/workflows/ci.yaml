@@ -137,25 +137,25 @@ jobs:
 
       # Comment
       - name: Install coverage dependencies
-        if: runner.os == 'Ubuntu'
+        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
         run: |
           sudo apt-get update 
           sudo apt-get install -y lcov python3
       
       # ---------- Setup python ----------
       - name: Set up python
-        if: runner.os == 'Ubuntu'
+        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
         run: |
           pipx install gcovr
 
       - name: Get coverage report
-        if: runner.os == 'Ubuntu'
+        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
         run: |
           mkdir -p coverage
           gcovr -r . --exclude 'tests' --exclude 'build' --lcov -o coverage/lcov.info
 
       - name: Upload coverage report
-        if: runner.os == 'Ubuntu'
+        if: ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.build_type }} == 'Debug'
         uses: actions/upload-artifact@v4
         with:
           name: coverage (ubuntu)
