@@ -7,8 +7,8 @@ on:
     branches: [ "**" ]
 
 jobs:
-  build-and-test:
-    name: ${{ matrix.os }} • ${{ matrix.build_type }}
+  build:
+    name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -85,17 +85,35 @@ jobs:
           $VCPKG_ROOT=${env:VCPKG_ROOT}
           cmake --build . --config ${{ matrix.build_type }}
 
-      # ---------- Test (CTest discovers Catch2 tests if you used add_test/catch_discover_tests) ----------
-      - name: Test
+  test:
+    name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
+    needs: build
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch build artifacts
+        uses: actions/download-artifacts@v4
+        with:
+          name: web-dist
+          path: ./dist
+
+      - name: Run tests
         if: runner.os != 'Windows'
         run: |
           ctest -N
           cat CTestTestfile.cmake
           ctest --output-on-failure
 
-      - name: Test
+      - name: Run tests
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $VCPKG_ROOT=${env:VCPKG_ROOT}
           ctest -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: coverage/**
