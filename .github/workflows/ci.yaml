@@ -61,7 +61,7 @@ jobs:
       - name: Configure
         if: runner.os != 'Windows'
         run: |
-          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -B build -G Ninja -DCHECK_COVERAGE=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Configure
         if: runner.os == 'Windows'
@@ -69,7 +69,6 @@ jobs:
         run: |
           $VCPKG_ROOT=${env:VCPKG_ROOT}
           cmake -DRUN_TESTS_AFTER_BUILD=OFF . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-          # Note: MSVC is multi-config; build type is chosen at build/ctest time.
 
       # ---------- Build ----------
       - name: Build
@@ -135,3 +134,101 @@ jobs:
         shell: pwsh
         run: |
           ctest -C ${{ matrix.build_type }} --test-dir build --output-on-failure
+
+  base_coverage:
+    name: Get base code coverage
+    runs-on: ubuntu-latest
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_TRIPLET: ubuntu-x64
+      VCPKG_FEATURE_FLAGS: manifests
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up vcpkg
+        run: |
+          git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+          $VCPKG_ROOT/bootstrap-vcpkg.sh
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y lcov ninja-build
+
+      - name: Configure
+        run: |
+          cmake -DRUN_TESTS_AFTER_BUILD=OFF . -B build -G Ninja -DCHECK_COVERAGE=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      - name: Get coverage report
+        run: |
+          mkdir -p coverage
+          lcov --capture --directory . --output-file coverage/lcov.info
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage (ubuntu base)
+          path: coverage/lcov.info
+
+  
+  coverage:
+    name: Check coverage
+    needs: [build, base_coverage]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cpp-binaries (ubuntu-latest - Debug)
+          path: ./build
+
+      # Comment
+      - name: Install coverage dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y lcov
+
+      - name: Set properties
+        run: |
+          chmod -R +x build/*
+          chmod -R +x build/**/*
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build
+
+      - name: Get coverage report
+        run: |
+          mkdir -p coverage
+          lcov --capture --directory . --output-file coverage/lcov.info
+
+      - name: Download base coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage (ubuntu base)
+          path: ./
+
+      - name: Barecheck report
+        uses: barecheck/code-coverage-action@v1
+        with:
+          barecheck-github-app-token: ${{ secrets.BARECHECK_GITHUB_APP_TOKEN }}
+          lcov-file: "./coverage/lcov.info"
+          base-lcov-file: "./lcov.info"
+          send-summary-comment: true
+          show-annotations: "warning"
+          minimum-ratio: 1

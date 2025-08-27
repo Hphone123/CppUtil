@@ -6,7 +6,14 @@ option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
 option(CREATE_PCH "Create PCH's for all headers" ON)
 option(BUILD_TESTS "Create test executables" ON)
 
-set (CMAKE_BUILD_TYPE Debug)
+option(CHECK_COVERAGE "Build with coverage flags" OFF)
+
+if(CHECK_COVERAGE)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-O0 -g --coverage)
+    add_link_options(--coverage)
+  endif()
+endif()
 
 if(ALLOW_TEST_FAIL)
   set(TEST_FAILSAFE || echo Continue...\n)
