@@ -369,9 +369,9 @@ public:
 template <typename T> class ResizableArray : public Array<T>
 {
 public:
-  ResizableArray(size_t size) : Array<T>(size) {};
+  ResizableArray(size_t size) : Array<T>(size){};
 
-  ResizableArray(const T * arr, size_t size) : Array<T>(arr, size) {};
+  ResizableArray(const T * arr, size_t size) : Array<T>(arr, size){};
 
   /**
    * Resizes the array.

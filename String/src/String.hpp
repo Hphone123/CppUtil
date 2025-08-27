@@ -14,14 +14,14 @@ private:
   using ResizableArray<char>::resizeForce;
 
 protected:
-  String(size_t size) : ResizableArray<char>(size) {};
+  String(size_t size) : ResizableArray<char>(size){};
 
 public:
-  String() : ResizableArray<char>(1) {};
+  String() : ResizableArray<char>(1){};
 
-  String(const char * str) : ResizableArray<char>(str, strlen(str) + 1) {};
+  String(const char * str) : ResizableArray<char>(str, strlen(str) + 1){};
 
-  String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1) {};
+  String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
   String operator+(const String& other) const
   {

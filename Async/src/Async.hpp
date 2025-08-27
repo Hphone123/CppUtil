@@ -209,8 +209,8 @@ public:                                                                         
     static_assert(std::is_invocable_v<decltype(&Self::__async__##func_name), Self&, Args...>,                          \
                   "Function: " #ret_type " " #func_name "(" #__VA_ARGS__                                               \
                   ") is not invocable with given arguments; see compiler log for more info!");                         \
-    return CppUtil::Async::async<ret_type>([this](Args&&... a) -> ret_type                                             \
-                                           { return this->__async__##func_name(a...); }, a...);                        \
+    return CppUtil::Async::async<ret_type>(                                                                            \
+      [this](Args&&... a) -> ret_type { return this->__async__##func_name(a...); }, a...);                             \
   }
 
 // Implementation of an async function
