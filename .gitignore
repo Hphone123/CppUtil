@@ -31,3 +31,6 @@ vcpkg_installed
 
 # VSCode Files
 .vscode
+
+# Code coverage reports
+coverage
