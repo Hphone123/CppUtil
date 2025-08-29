@@ -207,6 +207,10 @@ jobs:
     name: Check coverage
     needs: [build, base_coverage]
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -246,6 +250,7 @@ jobs:
         uses: barecheck/code-coverage-action@v1
         with:
           barecheck-github-app-token: ${{ secrets.BARECHECK_GITHUB_APP_TOKEN }}
+          barecheck-api-key: ${{ secrets.BARECHECK_API_KEY }}
           lcov-file: "./coverage/lcov.info"
           base-lcov-file: "./lcov.info"
           send-summary-comment: true
