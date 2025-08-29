@@ -268,7 +268,7 @@ jobs:
 
   coverage-badge:
     name: Create coverage badge
-    # if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') }}
+    if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') }}
     needs: coverage
     runs-on: ubuntu-latest
 
@@ -290,6 +290,8 @@ jobs:
         id: coverage
         run: |
           echo "pct=$(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')" >> $GITHUB_OUTPUT
+          lcov --list coverage/lcov.info
+          echo Current coverage: $(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')
 
       - name: Generate badge
         uses: emibcn/badge-action@v1
