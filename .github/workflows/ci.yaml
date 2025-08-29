@@ -257,6 +257,12 @@ jobs:
           show-annotations: "warning"
           minimum-ratio: 1
 
+      - name: Upload current coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage (ubuntu current)
+          path: coverage/lcov.info
+
   coverage-badge:
     name: Create coverage badge
     # if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') }}
@@ -269,27 +275,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: cpp-binaries (ubuntu-latest - Debug)
-          path: ./build
+          name: coverage (ubuntu current)
+          path: ./coverage
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update 
           sudo apt-get install -y lcov
-
-      - name: Set properties
-        run: |
-          chmod -R +x build/*
-          chmod -R +x build/**/*
-
-      - name: Run tests
-        run: |
-          ctest --test-dir build
-
-      - name: Get coverage report
-        run: |
-          mkdir -p coverage
-          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
 
       - name: Get coverage percentage
         id: coverage
@@ -304,7 +296,7 @@ jobs:
           path: coverage/badge.svg
 
       - name: Publish badge
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.18.0
         with:
           tag: badges
           name: Badges
