@@ -256,3 +256,63 @@ jobs:
           send-summary-comment: true
           show-annotations: "warning"
           minimum-ratio: 1
+
+  coverage-badge:
+    name: Create coverage badge
+    # if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') }}
+    needs: coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cpp-binaries (ubuntu-latest - Debug)
+          path: ./build
+
+      - name: Install coverage dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y lcov
+
+      - name: Set properties
+        run: |
+          chmod -R +x build/*
+          chmod -R +x build/**/*
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build
+
+      - name: Get coverage report
+        run: |
+          mkdir -p coverage
+          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
+
+      - name: Get coverage percentage
+        id: coverage
+        run: |
+          echo pct=$(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')
+
+      - name: Generate badge
+        uses: emibcn/badge-action@v1
+        with:
+          label: Code Coverage
+          status: ${{ steps.coverage.outputs.pct }}
+          path: coverage/badge.svg
+
+      - name: Publish badge
+        uses: ncipollo/release-action@v1
+        with:
+          tag: badges
+          name: Badges
+          allowUpdates: true
+          replaceArtifacts: true
+          artifacts: coverage/badge.svg
+          artifactContentType: image/svg+xml
+          makeLatest: false
+
+      
+
