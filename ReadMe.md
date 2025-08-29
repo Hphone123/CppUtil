@@ -3,95 +3,94 @@
 
 # CppUtil
 
-A hobby project implementing some utility functions and classes in c++.
-
-## Note
-
-**THIS IS A HOBBY PROJECT! I AM NOT AIMING TO IMPROVE ON ANYTHING BESIDES MY OWN CODING SKILL! ANYONE MAY CRITIZE THIS REPOSITORY, BUT PLEASE DO IT IN A FRIENDLY MATTER! IM JUST TRYIN TO LEARN AND ENJOY CODING C++!**
+C++ Utility library implementing whatever I may need right now.
 
 ## Prerequesits
 
+### VCPKG
+
 All dependencies are installed automaticly via [vcpkg](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started).
+Make sure you have it installed, set up and `VCPKG_ROOT` is set correctly.
 
-## Build
+### Pre-commit
 
-Build using CMAKE:
-
+This repo uses clang-format v14.0.6 for styling. To automaticly style on every commit, use `pre-commit`:
 ``` sh
-cmake --fresh [flags] -S .
-cmake --build .
+# Install python if you haven't already
+sudo apt update && sudo apt install python3
+
+pipx install pre-commit
+pre-commit install
+
+# Run the hook once to fetch required repos
+pre-commit run -a
 ```
 
+## Usage
+
+### Build
+
+Build using CMake:
+
+``` sh
+cmake -S . -B build [Options] [-DCMAKE_BUILD_TYPE=[Debug|Release|...]] [-DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"]
+cmake --build build
+```
+
+#### Options
+
+Option                  | Description                                                                       | Default
+------------------------|-----------------------------------------------------------------------------------|---------
+-DALLOW_TEST_FAIL       | Wether to allow the build to continue after a unit-test fail                      | OFF
+-DRUN_TESTS_AFTER_BUILD | Wether to run unit tests on build time                                            | ON
+-DCREATE_PCH            | Wether to create pre-compile heades (will speed up compile, may introduce errors) | ON
+-DBUILD_TESTS           | Wether to build unit tests (requires catch2, via vcpkg or other source)           | ON
+-DCHECK_COVERAGE        | Wether to create a test-coverage report                                           | OFF
 
 
-### Catch2
+### Test
 
-This repo uses [Catch2](https://github.com/catchorg/Catch2) for unit testing. \
-Test cases are automaticly run for every target after a successfull build. \
-To disable this, set `-DDISABLE_AUTO_TESTING=ON`.
+Run tests using CTest:
+``` sh
+ctest --test-dir build
+```
 
-### PCH
+To create a coverage report, use `lcov`
+``` sh
+# Install lcov if you haven't already
+sudo apt update && sudo apt install lcov
 
-All header files are pre-compiled into a pre-compiler header (PCH) to improve compile times.
-To disable this, set `-DCREATE_PCH=OFF`.
+lcov -c -d . -o <path>
+```
 
-### Build flags
+### Intigrate:
 
-- `-DALLOW_TEST_FAIL=[ON|OFF]`: Wether to continue the build if a test fails (`OFF` by default)
-- `-DRUN_TESTS_AFTER_BUILD=[ON|OFF]`: Wether to run tests after building a target (`ON` by default)
-- `-DCREATE_PCH=[ON|OFF]`: Wether to create a PCH for all headers (`ON` by default)
+This repo is designed to easily intigrate into other CMake projects.
 
-## Intigration
-
-### Using CMAKE
-
-Add this to your CMakeLists.txt: 
+To link this into your project:
 ``` CMake
-add_subdirectory(<path>)
+add_subdirectory(<CppUtil path>)
 include_directories(src)
+```
 
-...
-
+To link any CppUtil-target to your target:
+``` CMake
 target_link_libraries
 (
-  <yourTarget> PUBLIC
-    <whatever>
-    <you>
-    <may>
-    <need>
+  <yourTarget> 
+    PUBLIC
+      <CppUtil target>
+      ...
 )
 ```
 
-CMake targets:
-- Array (provides `Array`, `ResizableArray`, `DynamicArray`)
-- String (provides `String`)
-- Exception (provides `not_found`)
-- Map (provides `Map`)
+## Actions
 
-### not using CMAKE
+The Github-Actions-Pipeline tests the following things:
+- Build for Linux (ubuntu-latest), Windows (windows-latest) and MacOS (macos-latest) in Debug and Release mode
+- Unit tests for all platforms and build modes above
+- Code formatting
+- Code-Coverage regression
 
-All libs are single-header and header-only; you may put any header into your project, just  make sure to also put any header included.
-
-## Files and Classes
-- Array.hpp
-  - Includes:
-    - Exception.hpp
-  - Provides:
-    - `Array<T>`
-    - `ResizableArray<T>`
-    - `DynamicArray<T>`
-- String.hpp
-  - Includes:
-    - Array.hpp
-    - Exception.hpp
-  - Provides:
-    - `String`
-- Map.hpp
-  - Includes:
-    - Array.hpp
-    - Exception.hpp
-  - Provides:
-    - `Map<T, U>`
-- Exception.hpp
-  - Provides:
-    - `not_found`
+A pull request will only be approved if the pipleline is successfull.
+Changes to `.clang-format`  or `ci.yaml` will be checked and approved by hand.

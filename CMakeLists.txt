@@ -5,7 +5,6 @@ option(ALLOW_TEST_FAIL "Allow tests to fail, but still continue the build" OFF)
 option(RUN_TESTS_AFTER_BUILD "Run test cases after successfull build" ON)
 option(CREATE_PCH "Create PCH's for all headers" ON)
 option(BUILD_TESTS "Create test executables" ON)
-
 option(CHECK_COVERAGE "Build with coverage flags" OFF)
 
 if(CHECK_COVERAGE)
