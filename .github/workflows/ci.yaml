@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "**" ]
@@ -16,6 +19,7 @@ jobs:
 
       - name: Install clang-format 14
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt update
           sudo apt install -y clang-format-14
       
@@ -67,6 +71,7 @@ jobs:
       - name: Install Ninja
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update
           sudo apt-get install -y ninja-build tree
 
@@ -176,6 +181,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update 
           sudo apt-get install -y lcov ninja-build
 
@@ -195,6 +201,7 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -223,6 +230,7 @@ jobs:
       # Comment
       - name: Install coverage dependencies
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update 
           sudo apt-get install -y lcov
 
@@ -239,6 +247,14 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'
+          lcov --list coverage/lcov.info
+
+      - name: Upload current coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage (ubuntu current)
+          path: coverage/lcov.info
 
       - name: Download base coverage report
         uses: actions/download-artifact@v4
@@ -256,3 +272,46 @@ jobs:
           send-summary-comment: true
           show-annotations: "warning"
           minimum-ratio: 1
+
+  coverage-badge:
+    name: Create coverage badge
+    if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') }}
+    needs: coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage (ubuntu current)
+          path: ./coverage
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get remove --purge man-db
+          sudo apt-get update 
+          sudo apt-get install -y lcov
+
+      - name: Get coverage percentage
+        id: coverage
+        run: |
+          echo "pct=$(lcov --summary coverage/lcov.info | grep -oP 'lines......: \K[0-9.]+%')" >> $GITHUB_OUTPUT
+          lcov --summary coverage/lcov.info
+          echo Current coverage: $(lcov --summary coverage/lcov.info | grep -oP 'lines......: \K[0-9.]+%')
+
+      - name: Generate badge
+        uses: emibcn/badge-action@v1
+        with:
+          label: Code Coverage
+          status: ${{ steps.coverage.outputs.pct }}
+          path: coverage/badge.svg
+
+      - name: Publish badge
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: coverage
+
+      
+
