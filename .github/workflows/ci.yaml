@@ -198,6 +198,7 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*'
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -242,6 +243,14 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*'
+          lcov --list coverage/lcov.info
+
+      - name: Upload current coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage (ubuntu current)
+          path: coverage/lcov.info
 
       - name: Download base coverage report
         uses: actions/download-artifact@v4
@@ -259,12 +268,6 @@ jobs:
           send-summary-comment: true
           show-annotations: "warning"
           minimum-ratio: 1
-
-      - name: Upload current coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage (ubuntu current)
-          path: coverage/lcov.info
 
   coverage-badge:
     name: Create coverage badge
