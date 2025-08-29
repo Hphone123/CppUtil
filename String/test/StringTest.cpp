@@ -1,6 +1,6 @@
-#include "CatchVer.hpp"
-
 #include "String.hpp"
+
+#include "CatchVer.hpp"
 
 TEST_CASE("String Init", "[string][init]")
 {
@@ -42,7 +42,7 @@ TEST_CASE("String concat", "[string][concat]")
   {
     REQUIRE((s1 + " " + s2 + "!") == "Hello World!");
   }
-  
+
   SECTION("A String can be concatenated with an empty string constant")
   {
     REQUIRE((s1 + "") == "Hello");
@@ -54,48 +54,48 @@ TEST_CASE("String concat", "[string][concat]")
 TEST_CASE("String equality")
 {
   String s1 = "Hello", s2 = "World", s3 = "Hello World";
-  
+
   SECTION("A String is equal to itself")
   {
     REQUIRE(s1 == s1);
     REQUIRE(s2 == s2);
     REQUIRE(s3 == s3);
   }
-  
+
   SECTION("A String is equal to a Matching string constant")
   {
     REQUIRE(s1 == "Hello");
     REQUIRE(s2 == "World");
     REQUIRE(s3 == "Hello World");
   }
-  
+
   SECTION("A String is equal to another string with the same content")
   {
     String s4 = "Hello", s5 = "World", s6 = "Hello World";
-    
+
     REQUIRE(s1 == s4);
     REQUIRE(s2 == s5);
     REQUIRE(s3 == s6);
   }
-  
+
   SECTION("A String is not unequal to  itself")
   {
     REQUIRE_FALSE(s1 != s1);
     REQUIRE_FALSE(s2 != s2);
     REQUIRE_FALSE(s3 != s3);
   }
-  
+
   SECTION("A String is unequal to another different String")
   {
     REQUIRE(s1 != s2);
     REQUIRE(s1 != s3);
     REQUIRE(s2 != s3);
   }
-  
+
   SECTION("A String is not unequal to another String with the same content")
   {
     String s4 = "Hello", s5 = "World", s6 = "Hello World";
-    
+
     REQUIRE_FALSE(s1 != s4);
     REQUIRE_FALSE(s2 != s5);
     REQUIRE_FALSE(s3 != s6);
@@ -105,7 +105,7 @@ TEST_CASE("String equality")
 TEST_CASE("String length", "[string][length]")
 {
   String s1 = "Hello", s2 = "World", s3 = "Hello World";
-  
+
   REQUIRE(s1.length() == 5);
   REQUIRE(s2.length() == 5);
   REQUIRE(s3.length() == 11);
@@ -122,5 +122,22 @@ TEST_CASE("String Remove Element", "[string][remove]")
 
     REQUIRE_NOTHROW(s3.remove(5, 6));
     REQUIRE(s3 == "Hello");
+  }
+}
+
+TEST_CASE("String Insert Element", "[string][insert]")
+{
+  String s1 = "Hell", s2 = "o World", s3 = "Hellorld";
+
+  SECTION("Strings can be appended")
+  {
+    s1.insert("o", 4);
+    REQUIRE(s1 == "Hello");
+  }
+
+  SECTION("Strings can be inserted")
+  {
+    s3.insert("o W", 4);
+    REQUIRE(s3 == "Hello World");
   }
 }

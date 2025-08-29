@@ -1,4 +1,4 @@
-name: CMake Build & Test
+name: CI
 
 on:
   push:
@@ -7,9 +7,28 @@ on:
     branches: [ "**" ]
 
 jobs:
+  lint:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format 14
+        run: |
+          sudo apt update
+          sudo apt install -y clang-format-14
+      
+      - name: Check code formatting
+        run: |
+          set -e
+          clang-format-14 -style=file -i $(git ls-files '*.c' '*.cc' '*.cxx' '*.cpp' '*.h' '*.hh' '*.hpp')
+          git diff --exit-code
+
   build:
     name: Build ${{ matrix.os }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -175,7 +194,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          lcov --capture --directory . --output-file coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -188,6 +207,10 @@ jobs:
     name: Check coverage
     needs: [build, base_coverage]
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -215,7 +238,7 @@ jobs:
       - name: Get coverage report
         run: |
           mkdir -p coverage
-          lcov --capture --directory . --output-file coverage/lcov.info
+          lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
 
       - name: Download base coverage report
         uses: actions/download-artifact@v4
@@ -227,6 +250,7 @@ jobs:
         uses: barecheck/code-coverage-action@v1
         with:
           barecheck-github-app-token: ${{ secrets.BARECHECK_GITHUB_APP_TOKEN }}
+          barecheck-api-key: ${{ secrets.BARECHECK_API_KEY }}
           lcov-file: "./coverage/lcov.info"
           base-lcov-file: "./lcov.info"
           send-summary-comment: true

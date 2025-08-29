@@ -9,7 +9,7 @@
 /**
  * Maps item U to unique key T
  */
-template<typename T, typename U> class Map
+template <typename T, typename U> class Map
 {
 private:
   DynamicArray<T> t;
@@ -18,19 +18,21 @@ private:
 public:
   Map() : t(), u() {}
 
-  Map(std::initializer_list<std::pair<const T, U>> list) {
-    for (const auto& item : list) {
+  Map(std::initializer_list<std::pair<const T, U>> list)
+  {
+    for (const auto& item : list)
+    {
       t.add(item.first);
       u.add(item.second);
     }
-  } 
+  }
 
   /**
    * Get item U correspinding to `key`
    * 
    * Adds `key` and a new item U if key is not found
    */
-  U& operator [](const T& key)
+  U& operator[](const T& key)
   {
     for (size_t i = 0; i < t.getCount(); i++)
     {
@@ -61,7 +63,7 @@ public:
     }
     throw not_found("Cannot get item of nonexistant key '" + key + "'!");
   }
-  
+
   /**
    * Set item U correspinding to `key` to `item`
    * 
@@ -79,7 +81,7 @@ public:
     }
     throw not_found("Cannot set item of nonexistant key '" + key + "'!");
   }
-  
+
   /**
    * Remove item U correspinding to `key`
    * 
