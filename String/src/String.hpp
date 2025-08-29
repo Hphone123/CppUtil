@@ -121,9 +121,9 @@ public:
     char * tmp = new char[this->size + len];
     size_t offset = 0;
 
-    for (size_t i = 0; i < this->length() + len; i++)
+    for (size_t i = 0; i < this->size; i++)
     {
-      while (i >= idx && offset < obj.length())
+      while (i >= idx && offset < len)
       {
         tmp[i + offset] = obj[offset];
         offset++;
