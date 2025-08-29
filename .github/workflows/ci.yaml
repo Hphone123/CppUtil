@@ -19,6 +19,7 @@ jobs:
 
       - name: Install clang-format 14
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt update
           sudo apt install -y clang-format-14
       
@@ -70,6 +71,7 @@ jobs:
       - name: Install Ninja
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update
           sudo apt-get install -y ninja-build tree
 
@@ -179,6 +181,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update 
           sudo apt-get install -y lcov ninja-build
 
@@ -227,6 +230,7 @@ jobs:
       # Comment
       - name: Install coverage dependencies
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update 
           sudo apt-get install -y lcov
 
@@ -286,6 +290,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get remove --purge man-db
           sudo apt-get update 
           sudo apt-get install -y lcov
 
