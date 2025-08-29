@@ -296,15 +296,9 @@ jobs:
           path: coverage/badge.svg
 
       - name: Publish badge
-        uses: ncipollo/release-action@v1.18.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          tag: badges
-          name: Badges
-          allowUpdates: true
-          replaceArtifacts: true
-          artifacts: coverage/badge.svg
-          artifactContentType: image/svg+xml
-          makeLatest: false
+          folder: coverage
 
       
 
