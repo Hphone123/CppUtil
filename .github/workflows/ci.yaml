@@ -289,7 +289,7 @@ jobs:
       - name: Get coverage percentage
         id: coverage
         run: |
-          echo pct=$(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')
+          echo "pct=$(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')" >> $GITHUB_OUTPUT
 
       - name: Generate badge
         uses: emibcn/badge-action@v1

@@ -1,4 +1,5 @@
-[![CMake Build & Test](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml)
+[![CI](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml)
+[![Code Coverage](https://hphone123.github.io/CppUtil/badge.svg)](https://github.com/Hphone123/CppUtil/)
 
 # CppUtil
 
