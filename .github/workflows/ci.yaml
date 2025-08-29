@@ -198,7 +198,7 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
-          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*'
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -243,7 +243,7 @@ jobs:
         run: |
           mkdir -p coverage
           lcov --capture --directory . --output-file coverage/lcov.info --ignore-errors mismatch
-          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*'
+          lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'
           lcov --list coverage/lcov.info
 
       - name: Upload current coverage
@@ -292,9 +292,9 @@ jobs:
       - name: Get coverage percentage
         id: coverage
         run: |
-          echo "pct=$(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')" >> $GITHUB_OUTPUT
-          lcov --list coverage/lcov.info
-          echo Current coverage: $(lcov --list coverage/lcov.info | grep -oP 'Total:\|\K[0-9.]+%')
+          echo "pct=$(lcov --summary coverage/lcov.info | grep -oP 'lines......: \K[0-9.]+%')" >> $GITHUB_OUTPUT
+          lcov --summary coverage/lcov.info
+          echo Current coverage: $(lcov --summary coverage/lcov.info | grep -oP 'lines......: \K[0-9.]+%')
 
       - name: Generate badge
         uses: emibcn/badge-action@v1
