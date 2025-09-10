@@ -98,7 +98,7 @@ public:
     if (len < 0)
       throw invalid_argument("Length must be a positive number!");
 
-    char * tmp = new char[this->size - len];
+    char * tmp    = new char[this->size - len];
     size_t offset = 0;
     for (size_t i = 0; i < this->size; i++)
     {
@@ -111,14 +111,14 @@ public:
       tmp[i - offset] = this->operator[](i);
     }
     delete[] this->arr;
-    this->arr = tmp;
+    this->arr  = tmp;
     this->size = this->size - len;
   }
 
   void insert(String obj, size_t idx)
   {
-    size_t len = obj.length();
-    char * tmp = new char[this->size + len];
+    size_t len    = obj.length();
+    char * tmp    = new char[this->size + len];
     size_t offset = 0;
 
     for (size_t i = 0; i < this->size; i++)
@@ -133,7 +133,7 @@ public:
     }
 
     delete[] this->arr;
-    this->arr = tmp;
+    this->arr  = tmp;
     this->size = this->size + len;
   }
 
