@@ -39,13 +39,13 @@ cmake --build build
 
 #### Options
 
-Option                  | Description                                                                       | Default
-------------------------|-----------------------------------------------------------------------------------|---------
--DALLOW_TEST_FAIL       | Wether to allow the build to continue after a unit-test fail                      | OFF
--DRUN_TESTS_AFTER_BUILD | Wether to run unit tests on build time                                            | ON
--DCREATE_PCH            | Wether to create pre-compile heades (will speed up compile, may introduce errors) | ON
--DBUILD_TESTS           | Wether to build unit tests (requires catch2, via vcpkg or other source)           | ON
--DCHECK_COVERAGE        | Wether to create a test-coverage report                                           | OFF
+Option                  | Description                                                                       | Values | Default
+------------------------|-----------------------------------------------------------------------------------|--------|--------
+-DALLOW_TEST_FAIL       | Wether to allow the build to continue after a unit-test fail                      | ON|OFF | OFF
+-DRUN_TESTS_AFTER_BUILD | Wether to run unit tests on build time                                            | ON|OFF | ON
+-DCREATE_PCH            | Wether to create pre-compile heades (will speed up compile, may introduce errors) | ON|OFF | ON
+-DBUILD_TESTS           | Wether to build unit tests (requires catch2, via vcpkg or other source)           | ON|OFF | ON
+-DCHECK_COVERAGE        | Wether to create a test-coverage report                                           | ON|OFF | OFF
 
 
 ### Test

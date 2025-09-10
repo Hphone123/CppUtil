@@ -7,8 +7,8 @@
 TEST_CASE("Array Access", "[array][access]")
 {
   Array<int> a(11);
-  a[0] = 0;
-  a[1] = 1;
+  a[0]  = 0;
+  a[1]  = 1;
   a[10] = 123456;
 
   SECTION("Array elements can be accessed")
@@ -130,7 +130,7 @@ TEST_CASE("Array can be cast", "[array][cast]")
       [&]()
       {
         int * ptr = arr;
-        ptr[19] = 100;
+        ptr[19]   = 100;
         REQUIRE(arr[19] == 100);
       }());
   }
@@ -141,7 +141,7 @@ TEST_CASE("Array Size", "[array][size]")
   SECTION("Array size will match constructors")
   {
     Array<int> arr1(187);
-    int * tmp = new int[257];
+    int *      tmp = new int[257];
     Array<int> arr2(tmp, 257);
 
     REQUIRE(187 == arr1.getSize());
@@ -151,7 +151,7 @@ TEST_CASE("Array Size", "[array][size]")
   SECTION("Array will be marked as empty when initialized with 0")
   {
     Array<int> arr1(0);
-    int * tmp = new int[0];
+    int *      tmp = new int[0];
     Array<int> arr2(tmp, 0);
 
     REQUIRE(arr1.isEmpty());

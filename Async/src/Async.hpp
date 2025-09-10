@@ -17,7 +17,7 @@ struct AsyncState
   bool finished;
 
   std::condition_variable cv;
-  std::mutex mtx;
+  std::mutex              mtx;
 };
 
 template <typename T> class Promise
@@ -101,7 +101,7 @@ public:
 
   void setThrow(std::exception_ptr v)
   {
-    state->exc = v;
+    state->exc   = v;
     state->threw = true;
   }
 };
@@ -127,7 +127,7 @@ public:
 
   void setThrow(std::exception_ptr v)
   {
-    state->exc = v;
+    state->exc   = v;
     state->threw = true;
   }
 };
@@ -165,10 +165,10 @@ public:
 
     auto res = Future<T>();
 
-    using Fn = std::decay_t<Func>;
+    using Fn  = std::decay_t<Func>;
     using Tup = std::tuple<std::decay_t<Args>...>;
 
-    auto fn = Fn(std::forward<Func>(f));
+    auto fn   = Fn(std::forward<Func>(f));
     auto args = Tup(std::forward<Args>(a)...);
 
     std::thread([res, fn = std::move(fn), args = std::move(args)]() mutable

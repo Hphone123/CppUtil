@@ -13,7 +13,7 @@ using namespace std;
 template <typename T> class Array
 {
 protected:
-  T * arr;
+  T *    arr;
   size_t size;
 
 public:
@@ -29,7 +29,7 @@ public:
       throw length_error("Size " + to_string(size) + " is not a valid array size!");
     }
 
-    this->arr = new T[size]();
+    this->arr  = new T[size]();
     this->size = size;
   }
 
@@ -88,7 +88,7 @@ public:
       throw length_error("Size" + to_string(size) + " is not a valid array size!");
     }
     this->size = init.size();
-    this->arr = new T[this->size]();
+    this->arr  = new T[this->size]();
 
     size_t i = 0;
     for (auto x : init)
@@ -109,7 +109,7 @@ public:
         tmp[i] = other.arr[i];
       }
 
-      this->arr = tmp;
+      this->arr  = tmp;
       this->size = other.size;
     }
 
@@ -439,7 +439,7 @@ public:
       }
       delete[] this->arr;
 
-      this->arr = tmp;
+      this->arr  = tmp;
       this->size = newSize;
     }
   }
@@ -448,7 +448,7 @@ public:
 template <typename T> class DynamicArray
 {
 protected:
-  size_t count = 0;
+  size_t count        = 0;
   size_t resizeFactor = 2;
 
   ResizableArray<T> arr;
@@ -456,7 +456,7 @@ protected:
 public:
   DynamicArray<T>() : arr(2)
   {
-    this->count = 0;
+    this->count        = 0;
     this->resizeFactor = 2;
   }
 
@@ -467,7 +467,7 @@ public:
       throw length_error("Size " + to_string(cap) + " is not a valid array size!");
     }
 
-    this->count = 0;
+    this->count        = 0;
     this->resizeFactor = 2;
   }
 
@@ -483,7 +483,7 @@ public:
       throw invalid_argument("Dynamic scaling factor must be bigger than 1!");
     }
 
-    this->count = 0;
+    this->count        = 0;
     this->resizeFactor = resizeFactor;
   }
 

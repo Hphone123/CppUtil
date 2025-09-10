@@ -10,6 +10,8 @@ ContinuationIndentWidth: 2
 AccessModifierOffset: -2
 IndentCaseLabels: true
 NamespaceIndentation: None
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
 
 # Braces & short statements
 BreakBeforeBraces: Allman
