@@ -9,8 +9,8 @@ TEST_CASE("Test Square Brackets", "[square_brackets]")
   REQUIRE_NOTHROW(
     [&]()
     {
-      m["One"] = 1;
-      m["Two"] = 2;
+      m["One"]   = 1;
+      m["Two"]   = 2;
       m["Three"] = 3;
 
       REQUIRE(m["One"] == 1);

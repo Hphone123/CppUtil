@@ -24,7 +24,7 @@ public:
 class IterationListTest : public Iterable<IterationListTest *>, public IterationElement<IterationListTest *>
 {
 public:
-  int val;
+  int                 val;
   IterationListTest * next = nullptr;
 
 public:

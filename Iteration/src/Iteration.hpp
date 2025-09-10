@@ -75,7 +75,7 @@ template <typename T> class Iterable
 {
 public:
   virtual Iterator<T> begin() const = 0;
-  virtual Iterator<T> end() const = 0;
+  virtual Iterator<T> end() const   = 0;
 };
 
 template <typename T> class IterationElement
