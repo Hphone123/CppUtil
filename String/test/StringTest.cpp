@@ -2,6 +2,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 TEST_CASE("String Init", "[string][init]")
 {
   String s;

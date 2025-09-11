@@ -4,6 +4,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 TEST_CASE("Array Access", "[array][access]")
 {
   Array<int> a(11);
@@ -58,7 +60,7 @@ TEST_CASE("Array Init", "[array][init]")
   SECTION("Array size cannot be a negative number")
   {
     Array<int> arr;
-    REQUIRE_THROWS_AS(arr = Array<int>(-1), length_error);
+    REQUIRE_THROWS_AS(arr = Array<int>(-1), std::length_error);
   }
 
   SECTION("Array can be initialized with copy constructor")

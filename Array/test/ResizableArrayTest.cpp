@@ -3,6 +3,8 @@
 #include "Array.hpp"
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 TEST_CASE("ResizableArray Resize", "[resizable_array][resize]")
 {
   ResizableArray<int> arr(5);
@@ -29,12 +31,12 @@ TEST_CASE("ResizableArray Resize", "[resizable_array][resize]")
 
   SECTION("ResizableArray cannot be sized beyond ARRAY_MAX_SIZE")
   {
-    REQUIRE_THROWS_AS(arr.resize(ARRAY_MAX_SIZE + 1), length_error);
+    REQUIRE_THROWS_AS(arr.resize(ARRAY_MAX_SIZE + 1), std::length_error);
   }
 
   SECTION("ResizableArray cannot be sized down normally")
   {
-    REQUIRE_THROWS_AS(arr.resize(4), length_error);
+    REQUIRE_THROWS_AS(arr.resize(4), std::length_error);
   }
 
   SECTION("ResizableArray can be forced to size down")

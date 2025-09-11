@@ -6,9 +6,11 @@
 #include "Array.hpp"
 #include "Exception.hpp"
 
+namespace CppUtil
+{
 /**
- * Maps item U to unique key T
- */
+  * Maps item U to unique key T
+  */
 template <typename T, typename U> class Map
 {
 private:
@@ -28,10 +30,10 @@ public:
   }
 
   /**
-   * Get item U correspinding to `key`
-   * 
-   * Adds `key` and a new item U if key is not found
-   */
+    * Get item U correspinding to `key`
+    * 
+    * Adds `key` and a new item U if key is not found
+    */
   U& operator[](const T& key)
   {
     for (size_t i = 0; i < t.getCount(); i++)
@@ -48,10 +50,10 @@ public:
   }
 
   /**
-   * Get item U corresponding to `key`
-   * 
-   * @throws not_found
-   */
+    * Get item U corresponding to `key`
+    * 
+    * @throws not_found
+    */
   U& tryGetItem(const T& key)
   {
     for (size_t i = 0; i < t.getCount(); i++)
@@ -65,10 +67,10 @@ public:
   }
 
   /**
-   * Set item U correspinding to `key` to `item`
-   * 
-   * @throws not_found
-   */
+    * Set item U correspinding to `key` to `item`
+    * 
+    * @throws not_found
+    */
   void trySetItem(const T& key, const U& item)
   {
     for (size_t i = 0; i < t.getCount(); i++)
@@ -83,10 +85,10 @@ public:
   }
 
   /**
-   * Remove item U correspinding to `key`
-   * 
-   * @throws not_found
-   */
+    * Remove item U correspinding to `key`
+    * 
+    * @throws not_found
+    */
   void tryRemoveItem(const T& key)
   {
     for (size_t i = 0; i < t.getCount(); i++)
@@ -101,3 +103,4 @@ public:
     throw not_found("Cannot remove item of nonexistant key '" + key + "'!");
   }
 };
+} // namespace CppUtil

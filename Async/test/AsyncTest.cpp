@@ -5,6 +5,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 /// @brief Async function returning void
 /// @param x The amount of seconds to sleep for
 __async__(void, voidfunc, int x)

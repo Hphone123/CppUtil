@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <utility>
 
+namespace CppUtil
+{
 // Common alias for the result of ++t
 template <typename T> using preinc_result_t = decltype(++std::declval<T&>());
 
@@ -83,3 +85,4 @@ template <typename T> class IterationElement
 public:
   virtual T operator++() = 0;
 };
+} // namespace CppUtil

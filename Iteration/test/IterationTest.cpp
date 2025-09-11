@@ -2,6 +2,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 class IterationTest : public Iterable<int>
 {
 private:
