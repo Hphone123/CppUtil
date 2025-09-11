@@ -22,6 +22,7 @@ if (NOT BUILD_TESTS)
 	set(RUN_TESTS_AFTER_BUILD OFF)
 else()
 	enable_testing()
+	add_definitions(-DBUILD_TESTS=1)
 endif()
 
 set (CMAKE_CXX_STANDARD 14)

@@ -2,6 +2,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 TEST_CASE("Test Square Brackets", "[square_brackets]")
 {
   Map<std::string, int> m;

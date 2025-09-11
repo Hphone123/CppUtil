@@ -1,5 +1,7 @@
 #pragma once
 
+namespace CppUtil
+{
 class Platform
 {
 #if defined(_WIN32) || defined(_WIN64)
@@ -35,3 +37,4 @@ class Platform
   static constexpr const char * LineEnding    = "\n";
 #endif
 };
+} // namespace CppUtil

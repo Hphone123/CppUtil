@@ -8,8 +8,8 @@
 // Hope a billion is enough elements you sick people
 #define ARRAY_MAX_SIZE 1'000'000'000
 
-using namespace std;
-
+namespace CppUtil
+{
 template <typename T> class Array
 {
 protected:
@@ -26,7 +26,7 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(size) + " is not a valid array size!");
     }
 
     this->arr  = new T[size]();
@@ -37,12 +37,12 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
     }
 
     if (buf == nullptr)
     {
-      throw invalid_argument("Buffer must not be a nullpointer!");
+      throw std::invalid_argument("Buffer must not be a nullpointer!");
     }
 
     this->arr = new T[size]();
@@ -70,7 +70,7 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
     }
     this->arr = new T[size]();
 
@@ -85,7 +85,7 @@ public:
   {
     if (init.size() > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size" + to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
     }
     this->size = init.size();
     this->arr  = new T[this->size]();
@@ -130,7 +130,7 @@ public:
   {
     if (idx < 0)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (this->size > idx)
@@ -139,7 +139,8 @@ public:
     }
     else
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for array of size " + to_string(this->size) + "!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for array of size " +
+                              std::to_string(this->size) + "!");
     }
   }
 
@@ -147,7 +148,7 @@ public:
   {
     if (idx < 0)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (this->size > idx)
@@ -156,7 +157,8 @@ public:
     }
     else
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for array of size " + to_string(this->size) + "!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for array of size " +
+                              std::to_string(this->size) + "!");
     }
   }
 
@@ -374,18 +376,18 @@ public:
   ResizableArray(const T * arr, size_t size) : Array<T>(arr, size){};
 
   /**
-   * Resizes the array.
-   * 
-   * @param newSize The size the array should be given.
-   * @throws `length_error` for invalid sizes
-   * @throws `length_error` when newSize is smaller than current size
-   * @note Use `resizeForce()` to force a size down.
-   */
+     * Resizes the array.
+     * 
+     * @param newSize The size the array should be given.
+     * @throws `length_error` for invalid sizes
+     * @throws `length_error` when newSize is smaller than current size
+     * @note Use `resizeForce()` to force a size down.
+     */
   void resize(size_t newSize)
   {
     if (newSize > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(newSize) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size!");
     }
 
     if (newSize > this->size)
@@ -406,24 +408,25 @@ public:
     }
     else
     {
-      throw length_error("Cannot resize from " + to_string(this->size) + " to " + to_string(newSize) + "!");
+      throw std::length_error("Cannot resize from " + std::to_string(this->size) + " to " + std::to_string(newSize) +
+                              "!");
     }
   }
   /**
-   * Force a resize of the array.
-   * 
-   * @param newSize The new size
-   * 
-   * @throws `length_error` for invalid array sizes.
-   * 
-   * @warning Does not throw when sizing down the array!
-   * @warning Use `resize()` to prevent data loss.
-   */
+     * Force a resize of the array.
+     * 
+     * @param newSize The new size
+     * 
+     * @throws `length_error` for invalid array sizes.
+     * 
+     * @warning Does not throw when sizing down the array!
+     * @warning Use `resize()` to prevent data loss.
+     */
   void resizeForce(size_t newSize)
   {
     if (newSize > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(newSize) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size!");
     }
 
     if (newSize >= this->size)
@@ -464,7 +467,7 @@ public:
   {
     if (cap > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(cap) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size!");
     }
 
     this->count        = 0;
@@ -475,12 +478,12 @@ public:
   {
     if (cap > ARRAY_MAX_SIZE)
     {
-      throw length_error("Size " + to_string(cap) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size!");
     }
 
     if (resizeFactor < 2)
     {
-      throw invalid_argument("Dynamic scaling factor must be bigger than 1!");
+      throw std::invalid_argument("Dynamic scaling factor must be bigger than 1!");
     }
 
     this->count        = 0;
@@ -491,13 +494,13 @@ public:
   {
     if (idx > ARRAY_MAX_SIZE)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (idx >= this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) +
-                         " elements!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for dynamic array with " +
+                              std::to_string(this->count) + " elements!");
     }
 
     return this->arr[idx];
@@ -507,13 +510,13 @@ public:
   {
     if (idx > ARRAY_MAX_SIZE)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (idx >= this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) +
-                         " elements!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for dynamic array with " +
+                              std::to_string(this->count) + " elements!");
     }
 
     return this->arr[idx];
@@ -548,13 +551,13 @@ public:
   {
     if (idx > ARRAY_MAX_SIZE)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (idx > this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) +
-                         " elements!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for dynamic array with " +
+                              std::to_string(this->count) + " elements!");
     }
 
     if (this->count >= this->getCap())
@@ -571,10 +574,10 @@ public:
     this->count++;
   }
   /**
-   * Remove the last element (the one with the biggest index) from the array
-   * 
-   * @throws `length_error` if array is already empty.
-   */
+     * Remove the last element (the one with the biggest index) from the array
+     * 
+     * @throws `length_error` if array is already empty.
+     */
   virtual void remove() final
   {
     if (count > 0)
@@ -587,33 +590,33 @@ public:
     }
     else
     {
-      throw length_error("Cannot remove element from empty dynamic array!");
+      throw std::length_error("Cannot remove element from empty dynamic array!");
     }
   }
 
   /**
-   * Remove the element at index @param idx and shift all elements after @param idx to the left so all elements are in a row.ADJ_OFFSET_SINGLESHOT
-   * 
-   * @param idx The index whoose element is to be removed
-   * 
-   * @throw `out_of_range` if 
-   */
+     * Remove the element at index @param idx and shift all elements after @param idx to the left so all elements are in a row.ADJ_OFFSET_SINGLESHOT
+     * 
+     * @param idx The index whoose element is to be removed
+     * 
+     * @throw `out_of_range` if 
+     */
   virtual void remove(size_t idx) final
   {
     if (idx > ARRAY_MAX_SIZE)
     {
-      throw out_of_range("Index " + to_string(idx) + " is not a valid array index!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " is not a valid array index!");
     }
 
     if (this->count == 0)
     {
-      throw length_error("Cannot remove element from empty dynamic array!");
+      throw std::length_error("Cannot remove element from empty dynamic array!");
     }
 
     if (idx >= this->count)
     {
-      throw out_of_range("Index " + to_string(idx) + " out of bounds for dynamic array with " + to_string(this->count) +
-                         " elements!");
+      throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for dynamic array with " +
+                              std::to_string(this->count) + " elements!");
     }
 
     this->count--;
@@ -637,7 +640,7 @@ public:
       return;
 
     if (startIdx >= this->getCount())
-      throw invalid_argument("Start index must be inside array bounds!");
+      throw std::invalid_argument("Start index must be inside array bounds!");
 
     for (size_t i = startIdx; i < this->getCount(); i++)
     {
@@ -711,8 +714,8 @@ public:
 };
 
 /******************************************************
- * Function that require classes further down in the file
- ******************************************************/
+   * Function that require classes further down in the file
+   ******************************************************/
 
 //ToDo: Unit Test
 template <typename T> Array<size_t> Array<T>::find(const T& el) const
@@ -730,8 +733,8 @@ template <typename T> Array<size_t> Array<T>::find(const T& el) const
 }
 
 /******************************************************
- * Static / Class-less functions
- ******************************************************/
+   * Static / Class-less functions
+   ******************************************************/
 
 template <typename T, typename func> static void foreach (Array<T> arr, func && f)
 {
@@ -749,9 +752,10 @@ template <typename T, typename func> static void foreach (DynamicArray<T> arr, f
   }
 }
 
+}; // namespace CppUtil
 namespace std
 {
-template <typename T> string to_string(const Array<T> arr)
+template <typename T> string to_string(const CppUtil::Array<T> arr)
 {
   string res = "{";
   arr.foreach ([&](const T& el) { res += to_string(el) + " "; });
@@ -759,7 +763,7 @@ template <typename T> string to_string(const Array<T> arr)
   return res;
 }
 
-template <typename T> string to_string(const Array<T> arr, size_t n)
+template <typename T> string to_string(const CppUtil::Array<T> arr, size_t n)
 {
   string res = "{";
   arr.foreach (
@@ -772,11 +776,11 @@ template <typename T> string to_string(const Array<T> arr, size_t n)
   return res;
 }
 
-template <typename T> string to_string(const DynamicArray<T>& arr)
+template <typename T> string to_string(const CppUtil::DynamicArray<T>& arr)
 {
   string res = "{";
   arr.foreach ([&](const T& el) { res += to_string(el) + " "; });
   res += "}";
   return res;
 }
-}; // namespace std
+} // namespace std

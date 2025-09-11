@@ -7,6 +7,8 @@
 #include "Array.hpp"
 #include "Exception.hpp"
 
+namespace CppUtil
+{
 class String : public ResizableArray<char>
 {
 private:
@@ -87,16 +89,16 @@ public:
   void remove(size_t idx, size_t len)
   {
     if (idx < 0 || idx >= this->size)
-      throw invalid_argument("Index must be within string bounds!");
+      throw std::invalid_argument("Index must be within string bounds!");
 
     if (idx + len > this->length())
-      throw invalid_argument("Removed element must not exceed string bounds!");
+      throw std::invalid_argument("Removed element must not exceed string bounds!");
 
     if (len == 0)
       return;
 
     if (len < 0)
-      throw invalid_argument("Length must be a positive number!");
+      throw std::invalid_argument("Length must be a positive number!");
 
     char * tmp    = new char[this->size - len];
     size_t offset = 0;
@@ -157,8 +159,8 @@ public:
   }
 
   /** 
-   * Replaces all occurences of `rem` with `rep`
-  */
+    * Replaces all occurences of `rem` with `rep`
+    */
   void replace(String& rem, String& rep)
   {
     auto idx = this->find(rem);
@@ -294,3 +296,4 @@ public:
     }
   }
 };
+} // namespace CppUtil

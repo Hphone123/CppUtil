@@ -2,6 +2,8 @@
 
 #include "CatchVer.hpp"
 
+using namespace CppUtil;
+
 #define UNIT_TEST 1
 
 #include <iostream>
@@ -48,7 +50,7 @@ TEST_CASE("DynamicArray Access", "[dynamic_array][access]")
 
   SECTION("DynamicArray cannot be accessed out of bounds")
   {
-    REQUIRE_THROWS_AS(arr[5] = 100, out_of_range);
+    REQUIRE_THROWS_AS(arr[5] = 100, std::out_of_range);
   }
 }
 
@@ -112,13 +114,13 @@ TEST_CASE("DynamicArray Remove", "[dynamic_arary][remove]")
   SECTION("Elements can be removed from the end of DynamicArray")
   {
     REQUIRE_NOTHROW(arr.remove());
-    REQUIRE_THROWS_AS(arr[4], out_of_range);
+    REQUIRE_THROWS_AS(arr[4], std::out_of_range);
   }
 
   SECTION("Elements can be removed from the middle of the DynaicArray")
   {
     REQUIRE_NOTHROW(arr.remove(2));
-    REQUIRE_THROWS_AS(arr[4], out_of_range);
+    REQUIRE_THROWS_AS(arr[4], std::out_of_range);
     REQUIRE(arr[0] == 1);
     REQUIRE(arr[1] == 2);
     REQUIRE(arr[2] == 4);
@@ -133,8 +135,8 @@ TEST_CASE("DynamicArray Remove", "[dynamic_arary][remove]")
     REQUIRE_NOTHROW(arr.remove());
     REQUIRE_NOTHROW(arr.remove());
 
-    REQUIRE_THROWS_AS(arr.remove(), length_error);
-    REQUIRE_THROWS_AS(arr.remove(0), length_error);
+    REQUIRE_THROWS_AS(arr.remove(), std::length_error);
+    REQUIRE_THROWS_AS(arr.remove(0), std::length_error);
   }
 }
 
