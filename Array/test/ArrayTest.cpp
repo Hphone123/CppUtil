@@ -30,6 +30,13 @@ TEST_CASE("Array Access", "[array][access]")
     REQUIRE_THROWS_AS(a[10] = a[11], std::out_of_range);
     REQUIRE_THROWS_AS(a[-1] = 1, std::out_of_range);
   }
+
+  SECTION("const Array cannot be accessed out of bounds")
+  {
+    const Array<int> b(a);
+    REQUIRE_THROWS_AS(b[11], std::out_of_range);
+    REQUIRE_THROWS_AS(b[-1], std::out_of_range);
+  }
 }
 
 TEST_CASE("Array Init", "[array][init]")
@@ -43,6 +50,21 @@ TEST_CASE("Array Init", "[array][init]")
         Array<int> arr(ptr, 5);
         delete[] ptr;
       }());
+  }
+
+  SECTION("Array cannot be initialized with nullpointer")
+  {
+    REQUIRE_THROWS_AS(Array<int>(nullptr, 5), std::invalid_argument);
+  }
+
+  SECTION("Array cannot be initialized with size bigger than ARRAY_MAX_SIZE")
+  {
+    REQUIRE_THROWS_AS(Array<int>(ARRAY_MAX_SIZE + 1), std::length_error);
+
+    int * ptr = new int[5];
+    REQUIRE_THROWS_AS(Array<int>(ptr, ARRAY_MAX_SIZE + 1), std::length_error);
+
+    delete[] ptr;
   }
 
   SECTION("Array size can be a positive number")
