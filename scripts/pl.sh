@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ -f README.md ]; then
   echo "Could not find README.md, please run this script from the project root"
   exit 1
@@ -17,7 +19,7 @@ if [ ! -d build ]; then
   cmake --fresh -S . -B build -G Ninja -DRUN_TESTS_AFTER_BUILD=OFF -DCHECK_COVERAGE=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 fi
 cmake --build build --config Debug
-ctest --test-dir build
+ctest --test-dir build/FileSystem --output-on-failure
 mkdir -p coverage
 lcov --capture --directory . --output-file coverage/lcov.info
 lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'

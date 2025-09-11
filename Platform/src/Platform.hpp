@@ -2,7 +2,7 @@
 
 namespace CppUtil
 {
-class Platform
+struct Platform
 {
 #if defined(_WIN32) || defined(_WIN64)
 #define PLATFORM_WINDOWS 1

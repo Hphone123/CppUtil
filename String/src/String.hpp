@@ -23,6 +23,12 @@ public:
 
   String(const char * str) : ResizableArray<char>(str, strlen(str) + 1){};
 
+  String(const char ch) : ResizableArray<char>(2)
+  {
+    this->operator[](0) = ch;
+    this->operator[](1) = '\0';
+  };
+
   String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
   String operator+(const String& other) const
@@ -43,6 +49,16 @@ public:
   operator std::string() const
   {
     return std::string(this->arr);
+  }
+
+  operator const char *() const
+  {
+    return this->arr;
+  }
+
+  const size_t last()
+  {
+    return this->size - 2;
   }
 
   bool operator==(const String& other) const
