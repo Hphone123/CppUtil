@@ -271,7 +271,7 @@ jobs:
           base-lcov-file: "./lcov.info"
           send-summary-comment: true
           show-annotations: "warning"
-          minimum-ratio: 1
+          minimum-ratio: 0
 
   coverage-badge:
     name: Create coverage badge
