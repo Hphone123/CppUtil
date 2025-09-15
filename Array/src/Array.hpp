@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -17,7 +18,7 @@ protected:
   size_t size;
 
 public:
-  Array<T>()
+  Array<T>() : size(0)
   {
     this->arr = new T[0]();
   }

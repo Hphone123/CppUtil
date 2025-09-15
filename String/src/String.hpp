@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <istream>
 #include <stdexcept>
 #include <string.h>
 
@@ -25,15 +26,15 @@ public:
 
   String(const char ch) : ResizableArray<char>(2)
   {
-    this->operator[](0) = ch;
-    this->operator[](1) = '\0';
+    this->operator[]((size_t)0) = ch;
+    this->operator[](1)         = '\0';
   };
 
   String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
   String operator+(const String& other) const
   {
-    String res = String(this->size + other.size - 1);
+    String res(this->size + other.size - 1);
     for (size_t i = 0; i < this->size - 1; i++)
     {
       res[i] = this->operator[](i);
@@ -46,6 +47,18 @@ public:
     return res;
   }
 
+  String& operator+=(const String& other)
+  {
+    size_t old_size = this->size;
+    this->resize(this->size + other.size - 1);
+    for (size_t i = 0; i < other.size; i++)
+    {
+      this->operator[](i + old_size - 1) = other[i];
+    }
+    this->operator[](this->size - 1) = '\0';
+    return *this;
+  }
+
   operator std::string() const
   {
     return std::string(this->arr);
@@ -56,7 +69,13 @@ public:
     return this->arr;
   }
 
-  const size_t last()
+  friend std::ostream& operator<<(std::ostream& os, const String& str)
+  {
+    os << static_cast<const char *>(str);
+    return os;
+  }
+
+  const size_t last() const
   {
     return this->size - 2;
   }
@@ -177,8 +196,9 @@ public:
   /** 
     * Replaces all occurences of `rem` with `rep`
     */
-  void replace(String& rem, String& rep)
+  void replace(String rem, String rep)
   {
+    this->find(rem);
     auto idx = this->find(rem);
 
     for (size_t i = 0; i < idx.getSize(); i++)

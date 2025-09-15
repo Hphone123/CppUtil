@@ -23,24 +23,44 @@ class Path
 {
 private:
   String path;
+  bool   abs;
   bool   is_directory;
+  bool   exists;
 
-  Array<String> children;
+  uint16_t flags;
+
+  Array<Path> children;
 
 public:
+  /// @brief Create a Path  using '.'
   Path();
-  Path(const String path);
+
+  /// @brief Create a Path using the given path
+  /// @param path The path to use
+  /// @note Only absolute paths will be evaluated here; use `eval()` to evaluate relative paths later
+  Path(const String path, const bool scan = true);
   Path(const Path& base, const String relative);
 
   Path(const Path& other);
+  Path& operator=(const Path& other);
 
-  const char *         get() const;
-  const bool           exists() const;
-  const bool           is_dir() const;
-  const Array<String>& get_children() const;
+  /// @brief Evaluate the path
+  /// @param pwd The present working directory, used to resolve relative paths
+  const void eval(const Path pwd);
+
+  const String get() const;
+  const bool   is_absolute() const
+  {
+    return this->abs;
+  }
+  const bool         is_existant() const;
+  const bool         is_dir() const;
+  const Array<Path>& get_children() const;
 
   operator const String() const;
   operator const char *() const;
+
+  const Path operator+(const Path& other) const;
 };
 
 class File
@@ -54,7 +74,7 @@ public:
   File(const Path path, const IO_MODE mode = IO_MODE::READ_WRITE);
   ~File();
 
-  __async_member_decl__(const Array<uint8_t>, read, const size_t size = 0)
+  __async_member_decl__(const Array<uint8_t>, read, size_t size = 0)
     __async_member_decl__(const size_t, write, const Array<uint8_t>& data)
 
       __async_member_decl__(const Array<uint8_t>, read_from, const size_t offset, const size_t size = 0)
@@ -72,11 +92,16 @@ public:
 
   String pwd() const;
 
+  Array<Path> ls() const;
+  Array<Path> ls(const Path path = Path()) const;
+
   const File open(const Path path, const IO_MODE mode = IO_MODE::READ_WRITE) const;
   const File create(const Path path) const;
 
   const Path mkdir(const Path path) const;
 
-  const Path cd(const Path relative);
+  const Path cd(const Path path);
 };
+
+#define CurrentFileSystem FileSystem(argv[0])
 } // namespace CppUtil
