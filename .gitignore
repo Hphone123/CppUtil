@@ -34,3 +34,6 @@ vcpkg_installed
 
 # Code coverage reports
 coverage
+
+# Graphviz
+graphs
