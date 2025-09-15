@@ -15,9 +15,7 @@
 
 using namespace CppUtil;
 
-Path::Path() : Path(".") {}
-
-Path::Path(const String path, const bool scan) :
+Path::Path(const String& path, const bool scan) :
     path(path), abs(false), is_directory(false), exists(false), flags(0), children()
 {
 #if defined(PLATFORM_UNIX_LIKE)
@@ -52,6 +50,7 @@ Path::Path(const String path, const bool scan) :
     else
     {
       this->is_directory = true;
+      this->exists       = true;
 
       if (scan)
       {
@@ -71,10 +70,19 @@ Path::Path(const String path, const bool scan) :
 #endif
 }
 
+Path::Path() : Path(".") {}
+
+Path::Path(const char * path, const bool scan) : Path(String(path), scan) {}
+
 Path::Path(const Path& base, const String relative) : Path(base + (Path)relative) {}
 
 Path::Path(const Path& other) :
-    path(other.path), abs(other.abs), is_directory(other.is_directory), flags(other.flags), children(other.children)
+    path(other.path),
+    abs(other.abs),
+    is_directory(other.is_directory),
+    exists(other.exists),
+    flags(other.flags),
+    children(other.children)
 {
 }
 
@@ -82,13 +90,29 @@ Path& Path::operator=(const Path& other)
 {
   if (this != &other)
   {
-    this->path         = other.path;
+    this->path = other.path;
+
     this->abs          = other.abs;
     this->is_directory = other.is_directory;
-    this->flags        = other.flags;
-    this->children     = other.children;
+    this->exists       = other.exists;
+
+    this->flags = other.flags;
+
+    this->children = other.children;
   }
   return *this;
+}
+
+const void Path::eval()
+{
+  if (!this->abs)
+  {
+    return; // ToDo: Throw Exception?
+  }
+  else
+  {
+    *this = Path(this->get());
+  }
 }
 
 const void Path::eval(const Path pwd)
@@ -99,13 +123,39 @@ const void Path::eval(const Path pwd)
   }
   else
   {
-    *this = Path(pwd + *this);
+    if (this->path == ".")
+    {
+      *this = (pwd);
+    }
+    else if (this->path == "..")
+    {
+      auto tmp = pwd.get().splitAt(Platform::PathSeparator);
+#if defined(PLATFORM_UNIX_LIKE)
+      String res = Platform::PathSeparator;
+#else
+      String res = "";
+#endif
+      for (size_t i = 0; i < tmp.getSize() - 1; i++)
+      {
+        res += tmp[i] + (String)Platform::PathSeparator;
+      }
+      *this = Path(res);
+    }
+    else
+    {
+      *this = Path(pwd + *this);
+    }
   }
 }
 
 const String Path::get() const
 {
   return this->path;
+}
+
+const bool Path::is_absolute() const
+{
+  return this->abs;
 }
 
 const bool Path::is_existant() const
@@ -152,7 +202,7 @@ const Path Path::operator+(const Path& other) const
   }
 }
 
-File::File(const Path path, const IO_MODE mode) : file(nullptr), size(0), mode(mode)
+File::File(const Path path, const IO_MODE mode) : path(path), file(nullptr), size(0), mode(mode)
 {
   String mode_str;
   switch (mode)
@@ -161,10 +211,16 @@ File::File(const Path path, const IO_MODE mode) : file(nullptr), size(0), mode(m
       mode_str = "r";
       break;
     case IO_MODE::WRITE_ONLY:
+      mode_str = "r+";
+      break;
+    case IO_MODE::CREATE_WO:
       mode_str = "w";
       break;
     case IO_MODE::READ_WRITE:
       mode_str = "r+w";
+      break;
+    case IO_MODE::CREATE_RW:
+      mode_str = "wr";
       break;
     default:
       throw std::invalid_argument("Invalid IO_MODE given!");
@@ -172,23 +228,31 @@ File::File(const Path path, const IO_MODE mode) : file(nullptr), size(0), mode(m
 
   if (!path.is_existant())
   {
-    throw std::runtime_error("File '" + (std::string)path.get() + "' does not exist!");
+    if (mode == IO_MODE::CREATE_WO || mode == IO_MODE::CREATE_RW)
+    {
+      // ...
+    }
+    else
+    {
+      throw std::runtime_error("File '" + (std::string)path.get() + "' does not exist!"); // ToDo: Custom Exception
+    }
   }
 
   if (path.is_dir())
   {
-    throw std::runtime_error("Path '" + (std::string)path.get() + "' is a directory, not a file!");
+    throw std::runtime_error("Path '" + (std::string)path.get() +
+                             "' is a directory, not a file!"); // ToDo: Custom Exception
   }
 
-  if (path.is_absolute())
+  if (!path.is_absolute())
   {
-    throw std::invalid_argument("Path '" + (std::string)path.get() + "' is not absolute!");
+    throw std::invalid_argument("Path '" + (std::string)path.get() + "' is not absolute!"); // ToDo: Custom Exception
   }
 
   this->file = fopen(path.get(), mode_str);
   if (this->file == nullptr)
   {
-    throw std::runtime_error("Could not open file '" + (std::string)path.get() + "'!");
+    throw std::runtime_error("Could not open file '" + (std::string)path.get() + "'!"); // ToDo: Custom Exception
   }
 
   fseek(this->file, 0, SEEK_END);
@@ -205,12 +269,63 @@ File::~File()
   }
 }
 
-__async_member_impl__(const Array<uint8_t>, File, read, size_t size)
+// void File::reopen(const IO_MODE mode)
+// {
+//   this->close();
+//   *this = File(this->path, mode);
+// }
+
+// void File::close()
+// {
+//   if (this->file != nullptr)
+//   {
+//     fclose(this->file);
+//     this->file = nullptr;
+//   }
+// }
+
+const bool File::is_readable() const
 {
-  if (this->mode == IO_MODE::WRITE_ONLY)
+  switch (this->mode)
+  {
+    case (IO_MODE::READ_ONLY):
+    case (IO_MODE::READ_WRITE):
+    case (IO_MODE::CREATE_RW):
+      return true;
+    default:
+      return false;
+  }
+}
+
+const bool File::is_writable() const
+{
+  switch (this->mode)
+  {
+    case (IO_MODE::WRITE_ONLY):
+    case (IO_MODE::READ_WRITE):
+    case (IO_MODE::CREATE_WO):
+    case (IO_MODE::CREATE_RW):
+      return true;
+    default:
+      return false;
+  }
+}
+
+void File::stat()
+{
+  fseek(this->file, 0, SEEK_END);
+  this->size = ftell(this->file);
+  fseek(this->file, 0, SEEK_SET);
+}
+
+__async_member_impl__(Array<uint8_t>, File, read, size_t size)
+{
+  if (!this->is_readable())
   {
     throw std::runtime_error("File not opened in read mode!");
   }
+
+  this->stat();
 
   if (size == 0 || size > this->size)
   {
@@ -227,12 +342,14 @@ __async_member_impl__(const Array<uint8_t>, File, read, size_t size)
   return buffer;
 }
 
-__async_member_impl__(const size_t, File, write, const Array<uint8_t>& data)
+__async_member_impl__(size_t, File, write, const Array<uint8_t>& data)
 {
-  if (this->mode == IO_MODE::READ_ONLY)
+  if (!this->is_writable())
   {
     throw std::runtime_error("File not opened in write mode!");
   }
+
+  this->stat();
 
   size_t written_bytes = fwrite((const void *)data, 1, data.getSize(), this->file);
   if (written_bytes != data.getSize())
@@ -243,12 +360,16 @@ __async_member_impl__(const size_t, File, write, const Array<uint8_t>& data)
   return written_bytes;
 }
 
-__async_member_impl__(const Array<uint8_t>, File, read_from, const size_t offset, const size_t size)
+__async_member_impl__(Array<uint8_t>, File, read_from, const size_t offset, const size_t size)
 {
-  if (this->mode == IO_MODE::WRITE_ONLY)
+  if (!this->is_readable())
   {
     throw std::runtime_error("File not opened in read mode!");
   }
+
+  this->stat();
+
+  std::cout << this->size << std::endl;
 
   if (offset >= this->size)
   {
@@ -274,12 +395,14 @@ __async_member_impl__(const Array<uint8_t>, File, read_from, const size_t offset
   return buffer;
 }
 
-__async_member_impl__(const size_t, File, write_from, const size_t offset, const Array<uint8_t>& data)
+__async_member_impl__(size_t, File, write_from, const size_t offset, const Array<uint8_t>& data)
 {
-  if (this->mode == IO_MODE::READ_ONLY)
+  if (!this->is_writable())
   {
     throw std::runtime_error("File not opened in write mode!");
   }
+
+  this->stat();
 
   if (offset > this->size)
   {
@@ -333,7 +456,7 @@ Array<Path> FileSystem::ls(const Path path) const
   return p.get_children();
 }
 
-const File FileSystem::open(const Path path, const IO_MODE mode) const
+const File FileSystem::open(const Path& path, const IO_MODE mode) const
 {
   Path p = path;
   if (!p.is_absolute())
@@ -344,7 +467,7 @@ const File FileSystem::open(const Path path, const IO_MODE mode) const
   return File(p, mode);
 }
 
-const File FileSystem::create(const Path path) const
+const File FileSystem::create(const Path& path) const
 {
   Path p = path;
   if (!p.is_absolute())
@@ -357,10 +480,10 @@ const File FileSystem::create(const Path path) const
     throw std::runtime_error("File '" + (std::string)p.get() + "' already exists!");
   }
 
-  return File(p, IO_MODE::READ_WRITE);
+  return File(p, IO_MODE::CREATE_RW);
 }
 
-const Path FileSystem::mkdir(const Path path) const
+const Path FileSystem::mkdir(const Path& path) const
 {
   Path p = path;
   if (!p.is_absolute())
@@ -382,12 +505,15 @@ const Path FileSystem::mkdir(const Path path) const
   throw not_implemented_exception("Directory creation not implemented for Windows yet!");
 #endif
 
+  p.eval();
+
   return p;
 }
 
-const Path FileSystem::cd(const Path path)
+const Path FileSystem::cd(const Path& path)
 {
   Path p = path;
+
   if (!p.is_absolute())
   {
     p.eval(this->pwd());
@@ -398,7 +524,10 @@ const Path FileSystem::cd(const Path path)
     throw std::runtime_error("Path '" + (std::string)p.get() + "' does not exist!");
   }
 
-  throw std::runtime_error("Path '" + (std::string)p.get() + "' is not a directory!");
+  if (!p.is_dir())
+  {
+    throw std::runtime_error("Path '" + (std::string)p.get() + "' is not a directory!");
+  }
 
   this->path = p;
   return this->path;

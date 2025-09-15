@@ -16,10 +16,10 @@ fi
 if [ ! -d build ]; then
   echo "No previous build files found, starting fresh..."
   rm -rf CMakeCache.txt CMakeFiles
-  cmake --fresh -S . -B build -G Ninja -DRUN_TESTS_AFTER_BUILD=OFF -DCHECK_COVERAGE=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+  cmake --fresh -S . -B build -G "Unix Makefiles" -DRUN_TESTS_AFTER_BUILD=OFF -DCHECK_COVERAGE=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 fi
-cmake --build build --config Debug
-ctest --test-dir build/FileSystem --output-on-failure
+cmake --build build --config Debug 
+ctest --test-dir build --output-on-failure # --exclude-regex 'Async'
 mkdir -p coverage
 lcov --capture --directory . --output-file coverage/lcov.info
 lcov --remove coverage/lcov.info -o coverage/lcov.info '/usr/**/*' '**/build/**/*' '*Test.cpp'

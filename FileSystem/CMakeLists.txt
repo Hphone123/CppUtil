@@ -60,10 +60,3 @@ if (BUILD_TESTS)
 	include(Catch)
 	catch_discover_tests(FileSystemTest)
 endif()
-
-add_executable(FileSystemTest_noCatch 
-	test/FileSystemTest_noCatch.cpp)
-
-target_link_libraries(FileSystemTest_noCatch
-	PUBLIC
-		FileSystem)

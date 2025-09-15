@@ -27,7 +27,7 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size " + std::to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(size) + " is not a valid array size 1!");
     }
 
     this->arr  = new T[size]();
@@ -38,7 +38,7 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size 2!");
     }
 
     if (buf == nullptr)
@@ -71,7 +71,7 @@ public:
   {
     if (size > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size 3!");
     }
     this->arr = new T[size]();
 
@@ -86,7 +86,7 @@ public:
   {
     if (init.size() > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size!");
+      throw std::length_error("Size" + std::to_string(size) + " is not a valid array size 4!");
     }
     this->size = init.size();
     this->arr  = new T[this->size]();
@@ -388,7 +388,7 @@ public:
   {
     if (newSize > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size 5!");
     }
 
     if (newSize > this->size)
@@ -427,7 +427,7 @@ public:
   {
     if (newSize > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(newSize) + " is not a valid array size 6!");
     }
 
     if (newSize >= this->size)
@@ -468,7 +468,7 @@ public:
   {
     if (cap > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size 7!");
     }
 
     this->count        = 0;
@@ -479,7 +479,7 @@ public:
   {
     if (cap > ARRAY_MAX_SIZE)
     {
-      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size!");
+      throw std::length_error("Size " + std::to_string(cap) + " is not a valid array size 8!");
     }
 
     if (resizeFactor < 2)
