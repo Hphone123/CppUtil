@@ -23,11 +23,17 @@ public:
 
   String(const char * str) : ResizableArray<char>(str, strlen(str) + 1){};
 
+  String(const char ch) : ResizableArray<char>(2)
+  {
+    this->operator[]((size_t)0) = ch;
+    this->operator[](1)         = '\0';
+  };
+
   String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
   String operator+(const String& other) const
   {
-    String res = String(this->size + other.size - 1);
+    String res(this->size + other.size - 1);
     for (size_t i = 0; i < this->size - 1; i++)
     {
       res[i] = this->operator[](i);
@@ -40,9 +46,37 @@ public:
     return res;
   }
 
+  String& operator+=(const String& other)
+  {
+    size_t old_size = this->size;
+    this->resize(this->size + other.size - 1);
+    for (size_t i = 0; i < other.size; i++)
+    {
+      this->operator[](i + old_size - 1) = other[i];
+    }
+    this->operator[](this->size - 1) = '\0';
+    return *this;
+  }
+
   operator std::string() const
   {
     return std::string(this->arr);
+  }
+
+  operator const char *() const
+  {
+    return this->arr;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const String& str)
+  {
+    os << static_cast<const char *>(str);
+    return os;
+  }
+
+  const size_t last() const
+  {
+    return this->size - 2;
   }
 
   bool operator==(const String& other) const
@@ -117,7 +151,7 @@ public:
     this->size = this->size - len;
   }
 
-  void insert(String obj, size_t idx)
+  void insert(const String& obj, size_t idx)
   {
     size_t len    = obj.length();
     char * tmp    = new char[this->size + len];
@@ -139,7 +173,7 @@ public:
     this->size = this->size + len;
   }
 
-  Array<size_t> find(const String str)
+  Array<size_t> find(const String& str)
   {
     DynamicArray<size_t> res;
     for (size_t i = 0; i < this->size; i++)
@@ -161,8 +195,9 @@ public:
   /** 
     * Replaces all occurences of `rem` with `rep`
     */
-  void replace(String& rem, String& rep)
+  void replace(const String& rem, const String& rep)
   {
+    this->find(rem);
     auto idx = this->find(rem);
 
     for (size_t i = 0; i < idx.getSize(); i++)
@@ -211,7 +246,7 @@ public:
   }
 
   // ToDo: UnitTest
-  DynamicArray<String> splitAt(char character) const
+  Array<String> splitAt(char character) const
   {
     DynamicArray<String> res;
     for (size_t i = 0; i < this->length(); i++)
@@ -237,7 +272,7 @@ public:
         i++;
       }
     }
-    return res;
+    return res.toArray();
   }
 
   static bool charIsAlpha(char c)
@@ -262,7 +297,7 @@ public:
     return true;
   }
 
-  bool isAlphaOr(String characters)
+  bool isAlphaOr(const String& characters)
   {
     for (size_t i = 0; i < this->length(); i++)
     {
@@ -295,5 +330,17 @@ public:
                       "Function must have signature 'void(char)' or 'void(char, size_t)'!");
     }
   }
+
+  // Array<uint8_t> asByteArray(bool includeNullTerminator = true) const
+  // {
+  //   Array<uint8_t> res(this->length() + (includeNullTerminator ? 1 : 0));
+
+  //   for (size_t i = 0; i < res.getSize(); i++)
+  //   {
+  //     res[i] = this->operator[](i);
+  //   }
+
+  //   return res;
+  // }
 };
 } // namespace CppUtil

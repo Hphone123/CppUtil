@@ -62,6 +62,11 @@ if (RUN_TESTS_AFTER_BUILD)
 	add_custom_target(RunIterationTest			ALL COMMENT "Running tests for 'Iteration'"				DEPENDS IterationTest				COMMAND ./Iteration/IterationTest ${TEST_FAILSAFE})
 endif()
 
+add_subdirectory(FileSystem)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunFileSystemTest			ALL COMMENT "Running tests for 'FileSystem'"			DEPENDS FileSystemTest			COMMAND ./FileSystem/FileSystemTest ${TEST_FAILSAFE})
+endif()
+
 add_subdirectory(Exception)
 add_subdirectory(Platform)
 add_subdirectory(CatchVer)
