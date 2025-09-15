@@ -331,16 +331,16 @@ public:
     }
   }
 
-  Array<uint8_t> asByteArray(bool includeNullTerminator = true) const
-  {
-    Array<uint8_t> res(this->length() + (includeNullTerminator ? 1 : 0));
+  // Array<uint8_t> asByteArray(bool includeNullTerminator = true) const
+  // {
+  //   Array<uint8_t> res(this->length() + (includeNullTerminator ? 1 : 0));
 
-    for (size_t i = 0; i < res.getSize(); i++)
-    {
-      res[i] = this->operator[](i);
-    }
+  //   for (size_t i = 0; i < res.getSize(); i++)
+  //   {
+  //     res[i] = this->operator[](i);
+  //   }
 
-    return res;
-  }
+  //   return res;
+  // }
 };
 } // namespace CppUtil
