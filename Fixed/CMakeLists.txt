@@ -12,7 +12,6 @@ if(NOT MSVC)
 
 	if (CHECK_COVERAGE)
 		add_compile_options(-fkeep-inline-functions) 
-		add_compile_options(-fkeep-static-functions)
 	endif()
 endif(NOT MSVC)
 
@@ -26,6 +25,7 @@ add_library(Fixed
 
 target_link_libraries(Fixed
 	INTERFACE
+		String
 		Exception)
 
 set_target_properties(Fixed 
