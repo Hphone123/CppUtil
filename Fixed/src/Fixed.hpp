@@ -578,8 +578,13 @@ public:
    * @param s The String to be parsed
    * @return Fixed
    */
+#if defined(__SIZEOF_INT128__)
   template <uint8_t base = 10, uint64_t bef = 64, uint64_t aft = 63, bool sig = true,
             typename b_t = base_t_default_t<bef, aft, sig>>
+#else
+  template <uint8_t base = 10, uint64_t bef = 32, uint64_t aft = 31, bool sig = true,
+            typename b_t = base_t_default_t<bef, aft, sig>>
+#endif
   static constexpr Fixed<bef, aft, sig, b_t> parse(const char * s, size_t len)
   {
     Fixed<bef, aft, sig> res    = Fixed<bef, aft, sig>();
