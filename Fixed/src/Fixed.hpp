@@ -520,7 +520,7 @@ public:
    */
   template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(double d) : _value((base_t)0)
   {
-    static_assert(!(!is_signed && allowNegativeOnUnsigned < 0),
+    static_assert(is_signed || allowNegativeOnUnsigned > 0,
                   "'double' to 'unsigned Fixed' conversion must specify behaviour for negative values!");
 
     constexpr uint64_t BM_DOUBLE_EXP = (((1ULL << 11) - 1) << 52);
@@ -530,11 +530,11 @@ public:
 
     if (is_signed)
     {
-      this->set_sign(tmp & (1UL << 63));
+      this->set_sign(tmp & (1ULL << 63));
     }
     else
     {
-      if (tmp & (1UL << 63) && !allowNegativeOnUnsigned)
+      if (tmp & (1ULL << 63) && !allowNegativeOnUnsigned)
       {
         throw "Converting a negative 'double' into an 'unsigned Fixed' was disallowed by template parameter!";
       }
