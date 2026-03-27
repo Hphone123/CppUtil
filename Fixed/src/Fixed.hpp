@@ -191,7 +191,7 @@ using base_t_default_t = typename std::conditional_t<
                                                            std::conditional_t<(beforeDec + afterDec + is_signed) <= 128,
                                                                               unsigned __int128, too_large_t>>>>>;
 #else
-                                                           too_large_t>>>>
+                                                           too_large_t>>>>;
 #endif
 
 /**
@@ -1050,17 +1050,17 @@ Fixed<before, after, sign> constexpr operator%(Fixed<before, after, sign> a, con
 }
 
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator==(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator==(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   return (a.sign() == b.sign()) && (a.value() == b.value());
 }
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator!=(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator!=(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   return !(a == b);
 }
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator<(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator<(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   if (a.sign() && !b.sign())
     return true;
@@ -1072,7 +1072,7 @@ bool constexpr operator<(const Fixed<before, after>& a, const Fixed<before, afte
     return a < b;
 }
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator>(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator>(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   if (a.sign() && !b.sign())
     return false;
@@ -1084,7 +1084,7 @@ bool constexpr operator>(const Fixed<before, after>& a, const Fixed<before, afte
     return a > b;
 }
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator<=(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator<=(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   if (a.sign() && !b.sign())
     return true;
@@ -1096,7 +1096,7 @@ bool constexpr operator<=(const Fixed<before, after>& a, const Fixed<before, aft
     return a <= b;
 }
 template <uint64_t before, uint64_t after, bool sign>
-bool constexpr operator>=(const Fixed<before, after>& a, const Fixed<before, after>& b)
+bool constexpr operator>=(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
 {
   if (a.sign() && !b.sign())
     return false;
