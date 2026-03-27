@@ -10,7 +10,7 @@ if(NOT MSVC)
 	add_compile_options(-Werror)
 	add_compile_options(-pedantic)
 
-	if (CHECK_COVERAGE)
+	if (CHECK_COVERAGE AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 		add_compile_options(-fkeep-inline-functions) 
 	endif()
 endif(NOT MSVC)
