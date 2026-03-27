@@ -271,6 +271,7 @@ jobs:
           base-lcov-file: "./lcov.info"
           send-summary-comment: true
           show-annotations: "warning"
+          fail-if-coverage-decreased: true
           minimum-ratio: 0
 
   coverage-badge:
