@@ -6,6 +6,12 @@
 
 #include "String.hpp"
 
+#if defined(__SIZEOF_INT128__)
+#define LARGEST_NATIVE_UNSIGNED_INT unsigned __int128
+#else
+#define LARGEST_NATIVE_UNSIGNED_INT uint64_t
+#endif
+
 namespace CppUtil
 {
 /**
@@ -576,7 +582,9 @@ public:
    * 
    * @tparam base The numeric base
    * @param s The String to be parsed
-   * @return Fixed
+   * @return Fixed The new Fixed
+   * @attention This function is only accurate for 37 base-10 digits for platforms with native `__int128`-support. 
+   * @attention This function is only accurate for 7 base-10 digits for platforms without native `__int128`-support.
    */
 #if defined(__SIZEOF_INT128__)
   template <uint8_t base = 10, uint64_t bef = 64, uint64_t aft = 63, bool sig = true,
@@ -585,17 +593,29 @@ public:
   template <uint8_t base = 10, uint64_t bef = 32, uint64_t aft = 31, bool sig = true,
             typename b_t = base_t_default_t<bef, aft, sig>>
 #endif
+  // ToDo: Create a version that accepts `base` as a param
   static constexpr Fixed<bef, aft, sig, b_t> parse(const char * s, size_t len)
   {
+    constexpr LARGEST_NATIVE_UNSIGNED_INT AFTER_DENOM_MAX = ((LARGEST_NATIVE_UNSIGNED_INT)-1) / base;
+
+    constexpr char ASCII_NUMERIC_BOUNDS     = '/' + base;
+    constexpr char ASCII_ALPHA_UPPER_BOUNDS = ASCII_NUMERIC_BOUNDS + 7;
+    constexpr char ASCII_ALPHA_LOWER_BOUNDS = '`' + base - 10;
+
     Fixed<bef, aft, sig> res    = Fixed<bef, aft, sig>();
-    b_t                  before = 0, afterNumer = 0, after = 0, afterDenom = 1;
+    b_t                  before = 0, after = 0;
+    // ToDo: This is a bandaid fix! Use 2 uint64_t (hi/lo) for each, and perform all operations accordingly!
+    LARGEST_NATIVE_UNSIGNED_INT afterDenom = 1, afterNumer = 0;
     if (s[0] == '-')
     {
-      if (!is_signed)
+      if constexpr (!is_signed)
       {
         throw "Unsigned Fixed cannot have a negative sign!";
       }
-      res.set_sign(true);
+      else
+      {
+        res.set_sign(true);
+      }
     }
 
     bool encounteredDecimal = false;
@@ -618,10 +638,6 @@ public:
 
       if (c < '0' || (c > '9' && c < 'A') || (c > 'Z' && c < 'a') || c > 'z')
         throw "Invalid character!";
-
-      constexpr char ASCII_NUMERIC_BOUNDS     = '/' + base;
-      constexpr char ASCII_ALPHA_UPPER_BOUNDS = ASCII_NUMERIC_BOUNDS + 7;
-      constexpr char ASCII_ALPHA_LOWER_BOUNDS = '`' + base - 10;
 
       uint8_t n = 0;
 
@@ -652,6 +668,9 @@ public:
 
       if (encounteredDecimal)
       {
+        //? Avoid overflow, stick with the digits we got
+        if (afterDenom >= AFTER_DENOM_MAX)
+          break;
         afterDenom *= base;
         afterNumer = (afterNumer * base) + n;
       }
@@ -826,46 +845,54 @@ public:
     const auto a = this->value();
     const auto b = other.value();
 
-    const auto a_sign = this->sign();
-    const auto b_sign = other.sign();
+    if constexpr (!is_signed)
+    {
+      this->set_value(a + b);
+      return *this;
+    }
+    else
+    {
+      const auto a_sign = this->sign();
+      const auto b_sign = other.sign();
 
-    if (a_sign && b_sign)
-    {
-      //? Wrap around check
-      if (a > VALUE_MAX - b)
+      if (a_sign && b_sign)
       {
-        this->set_sign(false);
-        this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
+        //? Wrap around check
+        if (a > VALUE_MAX - b)
+        {
+          this->set_sign(false);
+          this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
+        }
+        else
+        {
+          this->set_value(a + b);
+        }
+        return *this;
       }
-      else
+      else if (!a_sign && !b_sign)
       {
-        this->set_value(a + b);
+        //? Wrap around check
+        if (a > VALUE_MAX - b)
+        {
+          this->set_sign(true);
+          this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
+        }
+        else
+        {
+          this->set_value(a + b);
+        }
+        return *this;
       }
-      return *this;
-    }
-    else if (!a_sign && !b_sign)
-    {
-      //? Wrap around check
-      if (a > VALUE_MAX - b)
+      else if (a_sign && !b_sign)
       {
-        this->set_sign(true);
-        this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
+        *this -= other.with_sign(true);
+        return *this;
       }
-      else
+      else //? !a_sign && b_sign
       {
-        this->set_value(a + b);
+        *this -= other.with_sign(false);
+        return *this;
       }
-      return *this;
-    }
-    else if (a_sign && !b_sign)
-    {
-      *this -= other.with_sign(true);
-      return *this;
-    }
-    else //? !a_sign && b_sign
-    {
-      *this -= other.with_sign(false);
-      return *this;
     }
   };
 
@@ -874,46 +901,54 @@ public:
     const auto a = this->value();
     const auto b = other.value();
 
-    const auto a_sign = this->sign();
-    const auto b_sign = other.sign();
+    if constexpr (!is_signed)
+    {
+      this->set_value(a - b);
+      return *this;
+    }
+    else
+    {
+      const auto a_sign = this->sign();
+      const auto b_sign = other.sign();
 
-    if (a_sign && b_sign)
-    {
-      //? Subtraction crosses +/- threshold
-      if (a < b)
+      if (a_sign && b_sign)
       {
-        this->set_sign(false);
-        this->set_value(b - a);
+        //? Subtraction crosses +/- threshold
+        if (a < b)
+        {
+          this->set_sign(false);
+          this->set_value(b - a);
+        }
+        else
+        {
+          this->set_value(a - b);
+        }
+        return *this;
       }
-      else
+      else if (!a_sign && !b_sign)
       {
-        this->set_value(a - b);
+        //? Addition crosses +/- threshold
+        if (is_signed && (a < b))
+        {
+          this->set_sign(true);
+          this->set_value(b - a);
+        }
+        else
+        {
+          this->set_value(a - b);
+        }
+        return *this;
       }
-      return *this;
-    }
-    else if (!a_sign && !b_sign)
-    {
-      //? Addition crosses +/- threshold
-      if (is_signed && (a < b))
+      else if (a_sign && !b_sign)
       {
-        this->set_sign(true);
-        this->set_value(b - a);
+        *this += other.with_sign(true);
+        return *this;
       }
-      else
+      else //? !a_sign && b_sign
       {
-        this->set_value(a - b);
+        *this += other.with_sign(false);
+        return *this;
       }
-      return *this;
-    }
-    else if (a_sign && !b_sign)
-    {
-      *this += other.with_sign(true);
-      return *this;
-    }
-    else //? !a_sign && b_sign
-    {
-      *this += other.with_sign(false);
-      return *this;
     }
   };
 
@@ -943,6 +978,33 @@ public:
     this->set_value(this->value() % other.value());
     return *this;
   };
+
+  //* BITWISE OPERATORS
+
+  constexpr Fixed& operator<<=(const uint64_t val)
+  {
+    this->set_value(this->value() << val);
+  }
+  constexpr Fixed& operator>>=(const uint64_t val)
+  {
+    this->set_value(this->value() >> val);
+  }
+  constexpr Fixed& operator&=(const Fixed<beforeDec, afterDec, is_signed, base_t>& val)
+  {
+    this->set_value(this->value() & val);
+  }
+  constexpr Fixed& operator|=(const Fixed<beforeDec, afterDec, is_signed, base_t>& val)
+  {
+    this->set_value(this->value() | val);
+  }
+  constexpr Fixed& operator^=(const Fixed<beforeDec, afterDec, is_signed, base_t>& val)
+  {
+    this->set_value(this->value() ^ val);
+  }
+  constexpr Fixed operator~()
+  {
+    Fixed<beforeDec, afterDec, is_signed, base_t>(~this->value());
+  }
 };
 
 typedef Fixed<8, 7, true>   s_fp16;
@@ -964,7 +1026,7 @@ constexpr u_fp16 operator""_u_fp16(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<8, 8, false>::parse<10>(str, len);
+  return Fixed<8, 8, false>::parse<10, 8, 8, false>(str, len);
 }
 
 constexpr u_fp32 operator""_u_fp32(const char * str)
@@ -972,15 +1034,21 @@ constexpr u_fp32 operator""_u_fp32(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<16, 16, false>::parse<10>(str, len);
+  return Fixed<16, 16, false>::parse<10, 16, 16, false>(str, len);
 }
-
+/**
+ * @brief Construct a new unsigned Fixed<32, 32>
+ * 
+ * @param str The string to construct from
+ * @return u_fp64 The new unsigned Fixed<32, 32>
+ * @attention For Platforms 
+ */
 constexpr u_fp64 operator""_u_fp64(const char * str)
 {
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<32, 32, false>::parse<10>(str, len);
+  return Fixed<32, 32, false>::parse<10, 32, 32, false>(str, len);
 }
 
 #if defined(__SIZEOF_INT128__)
@@ -989,7 +1057,7 @@ constexpr u_fp128 operator""_u_fp128(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<64, 64, false>::parse<10>(str, len);
+  return Fixed<64, 64, false>::parse<10, 64, 64, false>(str, len);
 }
 #endif
 
@@ -998,7 +1066,7 @@ constexpr s_fp16 operator""_s_fp16(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<8, 7, true>::parse<10>(str, len);
+  return Fixed<8, 7, true>::parse<10, 8, 7, true>(str, len);
 }
 
 constexpr s_fp32 operator""_s_fp32(const char * str)
@@ -1006,7 +1074,7 @@ constexpr s_fp32 operator""_s_fp32(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<16, 15, true>::parse<10>(str, len);
+  return Fixed<16, 15, true>::parse<10, 16, 15, true>(str, len);
 }
 
 constexpr s_fp64 operator""_s_fp64(const char * str)
@@ -1014,7 +1082,7 @@ constexpr s_fp64 operator""_s_fp64(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<32, 31, true>::parse<10>(str, len);
+  return Fixed<32, 31, true>::parse<10, 32, 31, true>(str, len);
 }
 
 #if defined(__SIZEOF_INT128__)
@@ -1023,7 +1091,7 @@ constexpr s_fp128 operator""_s_fp128(const char * str)
   size_t len = 0;
   while (str[len] != '\0')
     len++;
-  return Fixed<64, 63, true>::parse<10>(str, len);
+  return Fixed<64, 63, true>::parse<10, 64, 63, true>(str, len);
 }
 #endif
 
@@ -1080,9 +1148,9 @@ bool constexpr operator<(const Fixed<before, after, sign>& a, const Fixed<before
   else if (!a.sign() && b.sign())
     return false;
   else if (a.sign() && b.sign())
-    return a > b;
+    return a.value() > b.value();
   else
-    return a < b;
+    return a.value() < b.value();
 }
 template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator>(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
@@ -1092,9 +1160,9 @@ bool constexpr operator>(const Fixed<before, after, sign>& a, const Fixed<before
   else if (!a.sign() && b.sign())
     return true;
   else if (a.sign() && b.sign())
-    return a < b;
+    return a.value() < b.value();
   else
-    return a > b;
+    return a.value() > b.value();
 }
 template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator<=(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
@@ -1104,9 +1172,9 @@ bool constexpr operator<=(const Fixed<before, after, sign>& a, const Fixed<befor
   else if (!a.sign() && b.sign())
     return false;
   else if (a.sign() && b.sign())
-    return a >= b;
+    return a.value() >= b.value();
   else
-    return a <= b;
+    return a.value() <= b.value();
 }
 template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator>=(const Fixed<before, after, sign>& a, const Fixed<before, after, sign>& b)
@@ -1116,8 +1184,43 @@ bool constexpr operator>=(const Fixed<before, after, sign>& a, const Fixed<befor
   else if (!a.sign() && b.sign())
     return true;
   else if (a.sign() && b.sign())
-    return a <= b;
+    return a.value() <= b.value();
   else
-    return a >= b;
+    return a.value() >= b.value();
+}
+
+template <uint64_t before, uint64_t after, bool sign, typename base>
+Fixed<before, after, sign, base> operator<<(Fixed<before, after, sign, base>& a, const uint64_t b)
+{
+  a <<= b;
+  return a;
+}
+template <uint64_t before, uint64_t after, bool sign, typename base>
+Fixed<before, after, sign, base> operator>>(Fixed<before, after, sign, base> a, const uint64_t b)
+{
+  a >>= b;
+  return a;
+}
+
+template <uint64_t before, uint64_t after, bool sign, typename base>
+Fixed<before, after, sign, base> operator&(Fixed<before, after, sign, base>        a,
+                                           const Fixed<before, after, sign, base>& b)
+{
+  a &= b;
+  return a;
+}
+template <uint64_t before, uint64_t after, bool sign, typename base>
+Fixed<before, after, sign, base> operator|(Fixed<before, after, sign, base>        a,
+                                           const Fixed<before, after, sign, base>& b)
+{
+  a |= b;
+  return a;
+}
+template <uint64_t before, uint64_t after, bool sign, typename base>
+Fixed<before, after, sign, base> operator^(Fixed<before, after, sign, base>        a,
+                                           const Fixed<before, after, sign, base>& b)
+{
+  a ^= b;
+  return a;
 }
 } // namespace CppUtil

@@ -62,3 +62,10 @@ ReflowComments: false
 # Misc
 SortUsingDeclarations: true
 DerivePointerAlignment: false
+
+# Catch 2 Ugglyness fixes
+StatementMacros:
+  - TEST_CASE
+  - SECTION
+  - REQUIRE
+  - CHECK
