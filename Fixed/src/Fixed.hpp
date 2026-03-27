@@ -37,11 +37,13 @@ template <> struct unsigned_integer_traits<uint64_t>
   static constexpr bool     defined = true;
   static constexpr uint64_t n_bits  = 64;
 };
+#if defined(__SIZEOF_INT128__)
 template <> struct unsigned_integer_traits<unsigned __int128>
 {
   static constexpr bool     defined = true;
   static constexpr uint64_t n_bits  = 128;
 };
+#endif
 
 /**
  * @brief Gets the signed equivalent to `T`
@@ -69,10 +71,12 @@ template <> struct get_signed<uint64_t>
 {
   using type = int64_t;
 };
+#if defined(__SIZEOF_INT128__)
 template <> struct get_signed<unsigned __int128>
 {
   using type = __int128;
 };
+#endif
 
 /**
  * @brief Get the signed equivalent of `T`
@@ -183,8 +187,12 @@ using base_t_default_t = typename std::conditional_t<
   std::conditional_t<(beforeDec + afterDec + is_signed) <= 16, uint16_t,
                      std::conditional_t<(beforeDec + afterDec + is_signed) <= 32, uint32_t,
                                         std::conditional_t<(beforeDec + afterDec + is_signed) <= 64, uint64_t,
+#if defined(__SIZEOF_INT128__)
                                                            std::conditional_t<(beforeDec + afterDec + is_signed) <= 128,
                                                                               unsigned __int128, too_large_t>>>>>;
+#else
+                                                           too_large_t>>>>
+#endif
 
 /**
  * @brief A fixed-point-number class. 
