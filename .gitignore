@@ -29,8 +29,6 @@ vcpkg_installed
 # Clangd Files
 .cache
 
-# VSCode Files
-.vscode
-
 # Code coverage reports
 coverage
+graphs

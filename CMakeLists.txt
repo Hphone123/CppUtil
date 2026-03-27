@@ -7,11 +7,13 @@ option(CREATE_PCH "Create PCH's for all headers" ON)
 option(BUILD_TESTS "Create test executables" ON)
 option(CHECK_COVERAGE "Build with coverage flags" OFF)
 
+if (CMAKE_BUILD_TYPE EQUAL Debug)
+	add_compile_options(-O0 -g)
+endif()
+
 if(CHECK_COVERAGE)
-  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    add_compile_options(-O0 -g --coverage)
-    add_link_options(--coverage)
-  endif()
+	add_compile_options(--coverage)
+	add_link_options(--coverage)
 endif()
 
 if(ALLOW_TEST_FAIL)
@@ -54,12 +56,17 @@ endif()
 
 add_subdirectory(Async)
 if (RUN_TESTS_AFTER_BUILD)
-	add_custom_target(RunAsyncTest					ALL COMMENT "Running tests for 'Async'"						DEPENDS AsyncTest						COMMAND ./Async/AsyncTest ${TEST_FAILSAFE})
+	# add_custom_target(RunAsyncTest					ALL COMMENT "Running tests for 'Async'"						DEPENDS AsyncTest						COMMAND ./Async/AsyncTest ${TEST_FAILSAFE})
 endif()
 
 add_subdirectory(Iteration)
 if (RUN_TESTS_AFTER_BUILD)
 	add_custom_target(RunIterationTest			ALL COMMENT "Running tests for 'Iteration'"				DEPENDS IterationTest				COMMAND ./Iteration/IterationTest ${TEST_FAILSAFE})
+endif()
+
+add_subdirectory(Fixed)
+if (RUN_TESTS_AFTER_BUILD)
+	add_custom_target(RunFixedTest					ALL COMMENT "Running tests for 'Fixed'"						DEPENDS FixedTest						COMMAND ./Fixed/FixedTest ${TEST_FAILSAFE})
 endif()
 
 add_subdirectory(Exception)

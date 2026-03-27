@@ -23,6 +23,11 @@ public:
 
   String(const char * str) : ResizableArray<char>(str, strlen(str) + 1){};
 
+  String(const char c) : ResizableArray<char>(2)
+  {
+    this->arr[0] = c;
+  }
+
   String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
   String operator+(const String& other) const
@@ -36,6 +41,18 @@ public:
     {
       res[i + this->size - 1] = other[i];
     }
+    res[res.size - 1] = '\0';
+    return res;
+  }
+
+  String operator+(const char c) const
+  {
+    String res = String(this->size + 1);
+    for (size_t i = 0; i < this->size - 1; i++)
+    {
+      res[i] = this->operator[](i);
+    }
+    res[res.size - 2] = c;
     res[res.size - 1] = '\0';
     return res;
   }

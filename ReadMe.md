@@ -1,7 +1,7 @@
+# CppUtil
+
 [![CI](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hphone123/CppUtil/actions/workflows/ci.yaml)
 [![Code Coverage](https://hphone123.github.io/CppUtil/badge.svg)](https://github.com/Hphone123/CppUtil/)
-
-# CppUtil
 
 C++ Utility library implementing whatever I may need right now.
 
@@ -15,9 +15,10 @@ Make sure you have it installed, set up and `VCPKG_ROOT` is set correctly.
 ### Pre-commit
 
 This repo uses clang-format v14.0.6 for styling. To automaticly style on every commit, use `pre-commit`:
+
 ``` sh
-# Install python if you haven't already
-sudo apt update && sudo apt install python3
+# Install python and pipx if you haven't already
+sudo apt update && sudo apt install -y python3 pipx
 
 pipx install pre-commit
 pre-commit install
@@ -41,21 +42,22 @@ cmake --build build
 
 Option                  | Description                                                                       | Values | Default
 ------------------------|-----------------------------------------------------------------------------------|--------|--------
--DALLOW_TEST_FAIL       | Wether to allow the build to continue after a unit-test fail                      | ON|OFF | OFF
--DRUN_TESTS_AFTER_BUILD | Wether to run unit tests on build time                                            | ON|OFF | ON
--DCREATE_PCH            | Wether to create pre-compile heades (will speed up compile, may introduce errors) | ON|OFF | ON
--DBUILD_TESTS           | Wether to build unit tests (requires catch2, via vcpkg or other source)           | ON|OFF | ON
--DCHECK_COVERAGE        | Wether to create a test-coverage report                                           | ON|OFF | OFF
-
+-DALLOW_TEST_FAIL       | Wether to allow the build to continue after a unit-test fail                      | ON, OFF| OFF
+-DRUN_TESTS_AFTER_BUILD | Wether to run unit tests on build time                                            | ON, OFF| ON
+-DCREATE_PCH            | Wether to create pre-compile heades (will speed up compile, may introduce errors) | ON, OFF| ON
+-DBUILD_TESTS           | Wether to build unit tests (requires catch2, via vcpkg or other source)           | ON, OFF| ON
+-DCHECK_COVERAGE        | Wether to create a test-coverage report                                           | ON, OFF| OFF
 
 ### Test
 
 Run tests using CTest:
+
 ``` sh
 ctest --test-dir build
 ```
 
 To create a coverage report, use `lcov`
+
 ``` sh
 # Install lcov if you haven't already
 sudo apt update && sudo apt install lcov
@@ -63,17 +65,19 @@ sudo apt update && sudo apt install lcov
 lcov -c -d . -o <path>
 ```
 
-### Intigrate:
+### Intigrate
 
 This repo is designed to easily intigrate into other CMake projects.
 
 To link this into your project:
+
 ``` CMake
 add_subdirectory(<CppUtil path>)
 include_directories(src)
 ```
 
 To link any CppUtil-target to your target:
+
 ``` CMake
 target_link_libraries
 (
@@ -87,6 +91,7 @@ target_link_libraries
 ## Actions
 
 The Github-Actions-Pipeline tests the following things:
+
 - Build for Linux (ubuntu-latest), Windows (windows-latest) and MacOS (macos-latest) in Debug and Release mode
 - Unit tests for all platforms and build modes above
 - Code formatting
