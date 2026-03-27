@@ -450,7 +450,7 @@ public:
    * @param f The float to be constructed from
    * @attention Will 'stick' to the highest / lowest value possible 
    */
-  template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(float f)
+  template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(float f) : _value((base_t)0)
   {
     static_assert(!(!is_signed && allowNegativeOnUnsigned < 0),
                   "'float' to 'unsigned Fixed' conversion must specify behaviour for negative values!");
@@ -510,7 +510,7 @@ public:
    * @param d The double to be constructed from
    * @attention Will 'stick' to the highest / lowest value possible 
    */
-  template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(double d)
+  template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(double d) : _value((base_t)0)
   {
     static_assert(!(!is_signed && allowNegativeOnUnsigned < 0),
                   "'double' to 'unsigned Fixed' conversion must specify behaviour for negative values!");
