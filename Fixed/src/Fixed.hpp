@@ -8,6 +8,11 @@
 
 namespace CppUtil
 {
+/**
+  * @brief Traits of any unsigned-integer-like
+  * @note Define this for your type to make it usable with `Fixed`
+  * @tparam T Your type
+  */
 template <typename T> struct unsigned_integer_traits
 {
   static constexpr bool defined = false;
@@ -40,7 +45,7 @@ template <> struct unsigned_integer_traits<unsigned __int128>
 
 /**
  * @brief Gets the signed equivalent to `T`
- * 
+ * @note Make sure you define this for your type to use it with `Fixed`.
  * @tparam T The type to get the signed equivalent to
  */
 template <typename T> struct get_signed
@@ -68,53 +73,110 @@ template <> struct get_signed<unsigned __int128>
 {
   using type = __int128;
 };
+
+/**
+ * @brief Get the signed equivalent of `T`
+ * 
+ * @tparam T the type to get the unsigned type to
+ */
 template <typename T> using get_signed_t = typename get_signed<T>::type;
 
-//* Unsigned integer operators
+/**
+ * @brief Checks wether a given type defines all unsigned-integer-operators required for `Fixed`
+ * 
+ * @tparam T The type to check
+ */
 template <typename, typename = void> struct has_unsigned_integer_operators : std::false_type
 {
 };
 
+/**
+ * @brief Checks wether a given type defines all unsigned-integer-operators required for `Fixed`.
+ * @note Make sure you define all operators for your type to use it with `Fixed`.
+ * @tparam T The type to check
+ */
 template <typename T>
 struct has_unsigned_integer_operators<
-  T, std::void_t<decltype(T{0}), decltype(T{1}),
+  T, std::void_t<
+       decltype(T{0}), decltype(T{1}),
 
-                 decltype(std::declval<T>() + std::declval<T>()), decltype(std::declval<T>() - std::declval<T>()),
-                 decltype(std::declval<T>() * std::declval<T>()), decltype(std::declval<T>() / std::declval<T>()),
-                 decltype(std::declval<T>() % std::declval<T>()),
+       //* ARITHMETICS
+       decltype(std::declval<T>() + std::declval<T>()), decltype(std::declval<T>() - std::declval<T>()),
+       decltype(std::declval<T>() * std::declval<T>()), decltype(std::declval<T>() / std::declval<T>()),
+       decltype(std::declval<T>() % std::declval<T>()),
 
-                 decltype(std::declval<T&>() += std::declval<T>()), decltype(std::declval<T&>() -= std::declval<T>()),
-                 decltype(std::declval<T&>() *= std::declval<T>()), decltype(std::declval<T&>() /= std::declval<T>()),
-                 decltype(std::declval<T&>() %= std::declval<T>()),
+       //* MEMBERS
+       decltype(std::declval<T&>() += std::declval<T>()), decltype(std::declval<T&>() -= std::declval<T>()),
+       decltype(std::declval<T&>() *= std::declval<T>()), decltype(std::declval<T&>() /= std::declval<T>()),
+       decltype(std::declval<T&>() %= std::declval<T>()), decltype(std::declval<T&>() <<= std::declval<unsigned>()),
+       decltype(std::declval<T&>() >>= std::declval<unsigned>()),
 
-                 decltype(std::declval<T>() << std::declval<unsigned>()),
-                 decltype(std::declval<T>() >> std::declval<unsigned>()),
+       //* BITWISE / -SHIFT
+       decltype(std::declval<T>() << std::declval<unsigned>()), decltype(std::declval<T>() >> std::declval<unsigned>()),
+       decltype(std::declval<T>() & std::declval<T>()), decltype(std::declval<T>() | std::declval<T>()),
+       decltype(std::declval<T>() ^ std::declval<T>()),
 
-                 decltype(std::declval<T>() == std::declval<T>()), decltype(std::declval<T>() != std::declval<T>()),
-                 decltype(std::declval<T>() < std::declval<T>()), decltype(std::declval<T>() <= std::declval<T>()),
-                 decltype(std::declval<T>() > std::declval<T>()), decltype(std::declval<T>() >= std::declval<T>())>>
+       //* COMPARISON
+       decltype(std::declval<T>() == std::declval<T>()), decltype(std::declval<T>() != std::declval<T>()),
+       decltype(std::declval<T>() < std::declval<T>()), decltype(std::declval<T>() <= std::declval<T>()),
+       decltype(std::declval<T>() > std::declval<T>()), decltype(std::declval<T>() >= std::declval<T>())>>
     : std::true_type
 {
 };
+
+/**
+ * @brief Checks wether a given type defines all unsigned-integer-operators required for `Fixed`
+ * 
+ * @tparam T The type to check
+ */
 template <typename T> using has_unsigned_integer_operators_v = typename has_unsigned_integer_operators<T>::value;
 
+/**
+* @brief Check wether a given type is unsigned-integer-_like.
+* Checks all operators required for `Fixed` (see `has_unsigned_integer_operators`) and `unsigned_integer_traits` is defined for the type
+* @tparam T The type to check
+*/
 template <typename, typename = void> struct is_unsigned_integer_like : std::false_type
 {
 };
+
+/**
+ * @brief Check wether a given type is unsigned-integer-_like.
+ * Checks all operators required for `Fixed` (see `has_unsigned_integer_operators`) and `unsigned_integer_traits` is defined for the type
+ * @tparam T The type to check
+ */
 template <typename T>
 struct is_unsigned_integer_like<
   T, std::enable_if<unsigned_integer_traits<T>::defined && has_unsigned_integer_operators_v<T>::value>> : std::true_type
 {
 };
 
-//* No basic type large enough to fit the bits before / after
+/**
+ * @brief Type indicating the requested number of bits exceeds the number of bits available in the largest primitive.
+ * 
+ */
 struct too_large_t
 {
 };
+
+/**
+ * @brief Checks wether a given type is `too_large_t` (used to fail compilation in `Fixed` via static_assert)
+ * 
+ * @tparam T The type to check
+ */
 template <typename T> struct is_too_large_t : std::is_same<T, too_large_t>
 {
 };
 
+/**
+ * @brief the selector for the default base_t for `Fixed`, based on template args
+ * 
+ * @tparam beforeDec Number of bits before the decimal point
+ * @tparam afterDec Number of bits after the decimal point
+ * @tparam is_signed Wether the type is signed
+ *
+ * @note Will select `CppUtil::too_large_t`, which fails compilation if used as base_type for `Fixed`, if no suitable primitive type is available
+ */
 template <uint64_t beforeDec, uint64_t afterDec, bool is_signed>
 using base_t_default_t = typename std::conditional_t<
   (beforeDec + afterDec + is_signed) <= 8, uint8_t,
@@ -125,25 +187,17 @@ using base_t_default_t = typename std::conditional_t<
                                                                               unsigned __int128, too_large_t>>>>>;
 
 /**
- * @brief A field-point class
+ * @brief A fixed-point-number class. 
+ * @tparam beforeDec  Number of bits before the decimal point (default is 16)
+ * @tparam afterDec   Number of bits after the decimal point (default is 15)
+ * @tparam is_signed  Wether it is signed or unsigned. Requires one extra bit if signed
+ * @tparam base_t     The base-type the fixed-point bases it's operations on. If left empty, a primitive will be automatically selected. If size > 128, no primitive is available; a custom type must be provided. Custom types MUST be `unsigned_integer_like`.
  */
 template <uint64_t beforeDec = 16, uint64_t afterDec = 15, bool is_signed = true,
           typename base_t = base_t_default_t<beforeDec, afterDec, is_signed>>
 class Fixed
 {
-private:
-  base_t _value;
-
-public:
-  using signed_base_t = get_signed_t<base_t>;
-
-  static base_t constexpr BM_BEFORE_DEC = (((base_t)1 << beforeDec) - 1) << afterDec;
-  static base_t constexpr BM_AFTER_DEC  = ((base_t)1 << afterDec) - 1;
-  template <typename = std::enable_if<is_signed>>
-  static base_t constexpr BM_SIGN           = is_signed ? ((base_t)1 << (beforeDec + afterDec)) : 0;
-  static base_t constexpr BM_ALL_VALUE_BITS = ((beforeDec + afterDec) >= unsigned_integer_traits<base_t>::n_bits) ?
-                                                (base_t)-1 :
-                                                (((base_t)1 << (afterDec + beforeDec))) - 1;
+  //* ASSERTIONS
 
   static_assert(!is_too_large_t<base_t>::value, "No primitive available fitting 'beforeDec + afterDec + is_signed'!");
   static_assert(
@@ -152,26 +206,92 @@ public:
   static_assert(unsigned_integer_traits<base_t>::n_bits >= (beforeDec + afterDec + (is_signed ? 1 : 0)),
                 "'base_t' must be large enough to fit all bits!");
 
-  static constexpr base_t BEFORE_DEC_MAX = ((base_t)1 << beforeDec) - 1;
-  static constexpr base_t VALUE_MAX      = BM_ALL_VALUE_BITS;
+private:
+  /**
+   * @brief The underlying value of the Object
+   */
+  base_t _value;
 
+  /**
+   * @brief Construct a new Fixed object from a given base_t
+   * 
+   * @param _value The value to init `_value` with
+   */
+  Fixed(base_t _value) : _value(_value){};
+
+public:
+  /**
+   * @brief A signed version  of `base_t`, or `base_t` itself if the type is unsigned
+   * @note Requires `get_signed` to be defined for `base_t`
+   */
+  using signed_base_t = std::conditional_t<is_signed, get_signed_t<base_t>, base_t>;
+
+  //* BITMASKS
+
+  /**
+   * @brief Masks all bits of the actual value; Will NOT mask the sign bit
+   */
+  static base_t constexpr BM_ALL_VALUE_BITS = ((beforeDec + afterDec) >= unsigned_integer_traits<base_t>::n_bits) ?
+                                                (base_t)-1 :
+                                                (((base_t)1 << (afterDec + beforeDec))) - 1;
+
+  /**
+   * @brief Masks all value bits before the decimal point
+   */
+  static base_t constexpr BM_BEFORE_DEC = (BM_ALL_VALUE_BITS << afterDec) & BM_ALL_VALUE_BITS;
+  /**
+   * @brief Masks all value bits after the decimal point
+   */
+  static base_t constexpr BM_AFTER_DEC = BM_ALL_VALUE_BITS >> beforeDec;
+
+  /**
+   * @brief Masks the sign bit. Will only be enabled if the Object is signed
+   */
+  template <typename = std::enable_if<is_signed>>
+  static base_t constexpr BM_SIGN = is_signed ? ((base_t)1 << (beforeDec + afterDec)) : 0;
+
+  /**
+   * @brief Maximum absolute value of the whole part of the value
+   */
+  static constexpr base_t BEFORE_DEC_MAX = BM_BEFORE_DEC >> afterDec;
+  /**
+   * @brief Maximum absolute value of the fractional part of the value
+   */
+  static constexpr base_t AFTER_DEC_MAX = BM_AFTER_DEC;
+  /**
+   * @brief Maximum absolute value of the value
+   */
+  static constexpr base_t VALUE_MAX = BM_ALL_VALUE_BITS;
+
+  /**
+   * @brief Rounding direction
+   */
   enum round_dir_e
   {
-    ROUND_DIR_AUTO,
-    ROUND_DIR_UP,
-    ROUND_DIR_DOWN
+    ROUND_DIR_DOWN = -1,
+    ROUND_DIR_AUTO = 0,
+    ROUND_DIR_UP   = 1
   };
 
+  /**
+   * @brief Get the sign
+   * 
+   * @return true If the sign is '-'
+   * @return false If teh sign is '+'
+   */
   const constexpr bool sign() const
   {
-    base_t x = BM_SIGN<>;
-    x        = x + 0;
     if constexpr (!is_signed)
       return false;
     else
       return (this->_value & BM_SIGN<>) ? true : false;
   }
 
+  /**
+   * @brief Set the sign
+   * 
+   * @param sign the sign ot set (true for '-', false for '+')
+   */
   void constexpr set_sign(bool sign)
   {
     static_assert(is_signed, "Cannot set sign on unsigned Fixed!");
@@ -179,11 +299,35 @@ public:
       (base_t)((base_t)(sign ? 1 : 0) << (beforeDec + afterDec)) + (base_t)(this->_value & BM_ALL_VALUE_BITS);
   }
 
-  const constexpr base_t value() const
+  /**
+   * @brief Get a new Fixed-object with the same absolute value, but a different sign.
+   * 
+   * @param sign The new sign
+   * @return Fixed<beforeDec, afterDec, is_signed, base_t> The new object
+   * @note Avoid when using complex `base_t`, requires expensive copy of `_value`
+   */
+  Fixed<beforeDec, afterDec, is_signed, base_t> with_sign(const bool sign) const
+  {
+    auto res = Fixed<beforeDec, afterDec, is_signed, base_t>(this->_value);
+    res.set_sign(sign);
+    return res;
+  }
+
+  /**
+   * @brief Get the absolute value
+   * 
+   * @return const base_t The absolute value 
+   */
+  const base_t constexpr value() const
   {
     return this->_value & BM_ALL_VALUE_BITS;
   }
 
+  /**
+   * @brief Set the value
+   * 
+   * @param value the value to set
+   */
   void constexpr set_value(base_t value)
   {
     if constexpr (is_signed)
@@ -206,8 +350,7 @@ public:
    */
   template <Fixed::round_dir_e dir = ROUND_DIR_AUTO> constexpr const signed_base_t round() const
   {
-    const signed_base_t sign = this->sign() ? -1 : 1;
-
+    const signed_base_t sign                = this->sign() ? -1 : 1;
     const base_t        UNSIGNED_ROUND_DOWN = (this->value() >> afterDec);
     const signed_base_t SIGNED_ROUND_DOWN   = sign * UNSIGNED_ROUND_DOWN;
 
@@ -220,7 +363,7 @@ public:
     }
     else if constexpr (dir == ROUND_DIR_UP)
     {
-      if (this->_value & BM_AFTER_DEC) //? Check if any bit after the decimal is set to avoid rounding XXX.0 to XXX+1
+      if (this->value() & BM_AFTER_DEC) //? Check if any bit after the decimal is set to avoid rounding XXX.0 to XXX+1
       {
         return SIGNED_ROUND_UP;
       }
@@ -231,7 +374,7 @@ public:
     }
     else if constexpr (dir == ROUND_DIR_AUTO)
     {
-      if ((this->_value & BM_AFTER_DEC) &
+      if ((this->value() & BM_AFTER_DEC) &
           (1ULL << (beforeDec - 1))) //? Check if the highest bit after the decimal is set -> XXX.5 -> Round up
       {
         return SIGNED_ROUND_UP;
@@ -288,11 +431,14 @@ public:
     }
   };
 
-  constexpr const Fixed<beforeDec, afterDec, is_signed> abs() const
+  /**
+   * @brief Get the absolute value of this
+   * 
+   * @return const Fixed<beforeDec, afterDec, is_signed> The absolute of this
+   */
+  const Fixed<beforeDec, afterDec, is_signed> constexpr abs() const
   {
-    Fixed<beforeDec, afterDec, is_signed, base_t> res = Fixed<beforeDec, afterDec, is_signed, base_t>();
-    res._value += this->_value & BM_ALL_VALUE_BITS;
-    return res;
+    return this->with_sign(false);
   }
 
   constexpr Fixed() : _value((base_t)0){};
@@ -357,6 +503,13 @@ public:
     }
   };
 
+  /**
+   * @brief Construct a new Fixed object
+   * 
+   * @tparam allowNegativeOnUnsigned Wether to allow converting negative 'double'-values to an 'unsigned Fixed'. Must only be set on 'unsigned Fixed'.
+   * @param d The double to be constructed from
+   * @attention Will 'stick' to the highest / lowest value possible 
+   */
   template <int8_t allowNegativeOnUnsigned = -1> constexpr Fixed(double d)
   {
     static_assert(!(!is_signed && allowNegativeOnUnsigned < 0),
@@ -438,6 +591,12 @@ public:
     {
       char c = s[i];
 
+      //? C++ digit-separator should be supported
+      if (c == '\'')
+      {
+        continue;
+      }
+
       if (c == '.')
       {
         encounteredDecimal = true;
@@ -505,6 +664,14 @@ public:
     return res;
   }
 
+  /**
+   * @brief Construct a new `Fixed` object
+   * @tparam before Number of bits before the decimal point 
+   * @tparam after Number of bits after the decimal point
+   * @tparam sign Wether the type is signed
+   * @tparam base The base-type to use
+   * @return Fixed<before, after, sign, base> a new Fixed object 
+   */
   template <uint64_t before, uint64_t after, bool sign, typename base>
   constexpr operator Fixed<before, after, sign, base>()
   {
@@ -527,6 +694,10 @@ public:
     return res;
   }
 
+  /**
+   * @brief `float`-cast operator
+   * Converts `this` into a float (32-bit floating-point-number)
+   */
   template <typename U                                                                              = base_t,
             typename std::enable_if_t<std::is_same_v<U, base_t> && beforeDec + afterDec <= 23, int> = 0>
   constexpr operator float() const
@@ -581,6 +752,10 @@ public:
     return 0.0;
   };
 
+  /**
+   * @brief `double`-cast operator
+   * Converts `this` into a double (64-bit floating-point-number)
+   */
   template <uint8_t base = 10> String to_string() const
   {
     static_assert(base <= 36, "Cannot use Base > 36!");
@@ -635,40 +810,96 @@ public:
 
   constexpr Fixed& operator+=(const Fixed<beforeDec, afterDec, is_signed>& other)
   {
-    if (other.sign())
+    const auto a = this->value();
+    const auto b = other.value();
+
+    const auto a_sign = this->sign();
+    const auto b_sign = other.sign();
+
+    if (a_sign && b_sign)
     {
-      this -= other;
+      //? Wrap around check
+      if (a > VALUE_MAX - b)
+      {
+        this->set_sign(false);
+        this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
+      }
+      else
+      {
+        this->set_value(a + b);
+      }
       return *this;
     }
-    else
+    else if (!a_sign && !b_sign)
     {
-      if (is_signed)
+      //? Wrap around check
+      if (a > VALUE_MAX - b)
       {
-        if (this->_value < other._value)
-          this->set_sign(!this->sign());
+        this->set_sign(true);
+        this->set_value(VALUE_MAX - (b - (VALUE_MAX - a)));
       }
-
-      this->set_value(this->value() + other.value());
+      else
+      {
+        this->set_value(a + b);
+      }
+      return *this;
+    }
+    else if (a_sign && !b_sign)
+    {
+      *this -= other.with_sign(true);
+      return *this;
+    }
+    else //? !a_sign && b_sign
+    {
+      *this -= other.with_sign(false);
       return *this;
     }
   };
 
-  constexpr Fixed& operator-=(const Fixed<beforeDec, afterDec>& other)
+  constexpr Fixed& operator-=(const Fixed<beforeDec, afterDec, is_signed>& other)
   {
-    if (other.sign)
+    const auto a = this->value();
+    const auto b = other.value();
+
+    const auto a_sign = this->sign();
+    const auto b_sign = other.sign();
+
+    if (a_sign && b_sign)
     {
-      this += other;
+      //? Subtraction crosses +/- threshold
+      if (a < b)
+      {
+        this->set_sign(false);
+        this->set_value(b - a);
+      }
+      else
+      {
+        this->set_value(a - b);
+      }
       return *this;
     }
-    else
+    else if (!a_sign && !b_sign)
     {
-      if (is_signed)
+      //? Addition crosses +/- threshold
+      if (is_signed && (a < b))
       {
-        if (this->_value < other._value)
-          this->set_sign(!this->sign());
+        this->set_sign(true);
+        this->set_value(b - a);
       }
-
-      this->set_value(this->value() - other.value());
+      else
+      {
+        this->set_value(a - b);
+      }
+      return *this;
+    }
+    else if (a_sign && !b_sign)
+    {
+      *this += other.with_sign(true);
+      return *this;
+    }
+    else //? !a_sign && b_sign
+    {
+      *this += other.with_sign(false);
       return *this;
     }
   };
@@ -775,95 +1006,95 @@ constexpr s_fp128 operator""_s_fp128(const char * str)
   return Fixed<64, 63, true>::parse<10>(str, len);
 }
 
-template <uint64_t before, uint64_t after>
-Fixed<before, after> constexpr operator+(Fixed<before, after> a, const Fixed<before, after>& b)
+template <uint64_t before, uint64_t after, bool sign>
+Fixed<before, after, sign> constexpr operator+(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
 {
   a += b;
   return a;
 }
 
-template <uint64_t before, uint64_t after>
-Fixed<before, after> constexpr operator-(Fixed<before, after> a, const Fixed<before, after>& b)
+template <uint64_t before, uint64_t after, bool sign>
+Fixed<before, after, sign> constexpr operator-(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
 {
   a -= b;
   return a;
 }
 
-template <uint64_t before, uint64_t after>
-Fixed<before, after> constexpr operator*(Fixed<before, after> a, const Fixed<before, after>& b)
+template <uint64_t before, uint64_t after, bool sign>
+Fixed<before, after, sign> constexpr operator*(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
 {
   a *= b;
   return a;
 }
 
-template <uint64_t before, uint64_t after>
-Fixed<before, after> constexpr operator/(Fixed<before, after> a, const Fixed<before, after>& b)
+template <uint64_t before, uint64_t after, bool sign>
+Fixed<before, after, sign> constexpr operator/(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
 {
   a /= b;
   return a;
 }
 
-template <uint64_t before, uint64_t after>
-Fixed<before, after> constexpr operator%(Fixed<before, after> a, const Fixed<before, after>& b)
+template <uint64_t before, uint64_t after, bool sign>
+Fixed<before, after, sign> constexpr operator%(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
 {
   a %= b;
   return a;
 }
 
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator==(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
-  return (a.sign == b.sign) && (a.value == b.value);
+  return (a.sign() == b.sign()) && (a.value() == b.value());
 }
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator!=(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
   return !(a == b);
 }
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator<(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
-  if (a.sign && !b.sign)
+  if (a.sign() && !b.sign())
     return true;
-  else if (!a.sign && b.sign)
+  else if (!a.sign() && b.sign())
     return false;
-  else if (a.sign && b.sign)
+  else if (a.sign() && b.sign())
     return a > b;
   else
     return a < b;
 }
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator>(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
-  if (a.sign && !b.sign)
+  if (a.sign() && !b.sign())
     return false;
-  else if (!a.sign && b.sign)
+  else if (!a.sign() && b.sign())
     return true;
-  else if (a.sign && b.sign)
+  else if (a.sign() && b.sign())
     return a < b;
   else
     return a > b;
 }
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator<=(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
-  if (a.sign && !b.sign)
+  if (a.sign() && !b.sign())
     return true;
-  else if (!a.sign && b.sign)
+  else if (!a.sign() && b.sign())
     return false;
-  else if (a.sign && b.sign)
+  else if (a.sign() && b.sign())
     return a >= b;
   else
     return a <= b;
 }
-template <uint64_t before, uint64_t after>
+template <uint64_t before, uint64_t after, bool sign>
 bool constexpr operator>=(const Fixed<before, after>& a, const Fixed<before, after>& b)
 {
-  if (a.sign && !b.sign)
+  if (a.sign() && !b.sign())
     return false;
-  else if (!a.sign && b.sign)
+  else if (!a.sign() && b.sign())
     return true;
-  else if (a.sign && b.sign)
+  else if (a.sign() && b.sign())
     return a <= b;
   else
     return a >= b;
