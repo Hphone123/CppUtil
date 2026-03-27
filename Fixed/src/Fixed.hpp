@@ -943,12 +943,16 @@ public:
 typedef Fixed<8, 7, true>   s_fp16;
 typedef Fixed<16, 15, true> s_fp32;
 typedef Fixed<32, 31, true> s_fp64;
+#if defined(__SIZEOF_INT128__)
 typedef Fixed<64, 63, true> s_fp128;
+#endif
 
 typedef Fixed<8, 8, false>   u_fp16;
 typedef Fixed<16, 16, false> u_fp32;
 typedef Fixed<32, 32, false> u_fp64;
+#if defined(__SIZEOF_INT128__)
 typedef Fixed<64, 64, false> u_fp128;
+#endif
 
 constexpr u_fp16 operator""_u_fp16(const char * str)
 {
@@ -974,6 +978,7 @@ constexpr u_fp64 operator""_u_fp64(const char * str)
   return Fixed<32, 32, false>::parse<10>(str, len);
 }
 
+#if defined(__SIZEOF_INT128__)
 constexpr u_fp128 operator""_u_fp128(const char * str)
 {
   size_t len = 0;
@@ -981,6 +986,7 @@ constexpr u_fp128 operator""_u_fp128(const char * str)
     len++;
   return Fixed<64, 64, false>::parse<10>(str, len);
 }
+#endif
 
 constexpr s_fp16 operator""_s_fp16(const char * str)
 {
@@ -1006,6 +1012,7 @@ constexpr s_fp64 operator""_s_fp64(const char * str)
   return Fixed<32, 31, true>::parse<10>(str, len);
 }
 
+#if defined(__SIZEOF_INT128__)
 constexpr s_fp128 operator""_s_fp128(const char * str)
 {
   size_t len = 0;
@@ -1013,6 +1020,7 @@ constexpr s_fp128 operator""_s_fp128(const char * str)
     len++;
   return Fixed<64, 63, true>::parse<10>(str, len);
 }
+#endif
 
 template <uint64_t before, uint64_t after, bool sign>
 Fixed<before, after, sign> constexpr operator+(Fixed<before, after, sign> a, const Fixed<before, after, sign>& b)
