@@ -220,7 +220,7 @@ class Fixed
   static_assert(unsigned_integer_traits<base_t>::n_bits >= (beforeDec + afterDec + (is_signed ? 1 : 0)),
                 "'base_t' must be large enough to fit all bits!");
 
-private:
+public:
   /**
    * @brief The underlying value of the Object
    */
@@ -233,7 +233,6 @@ private:
    */
   Fixed(base_t _value) : _value(_value){};
 
-public:
   /**
    * @brief A signed version  of `base_t`, or `base_t` itself if the type is unsigned
    * @note Requires `get_signed` to be defined for `base_t`
@@ -261,7 +260,6 @@ public:
   /**
    * @brief Masks the sign bit. Will only be enabled if the Object is signed
    */
-  template <typename = std::enable_if<is_signed>>
   static base_t constexpr BM_SIGN = is_signed ? ((base_t)1 << (beforeDec + afterDec)) : 0;
 
   /**
@@ -298,7 +296,7 @@ public:
     if constexpr (!is_signed)
       return false;
     else
-      return (this->_value & BM_SIGN<>) ? true : false;
+      return (this->_value & BM_SIGN) ? true : false;
   }
 
   /**

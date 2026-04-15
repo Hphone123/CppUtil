@@ -8,6 +8,16 @@
 
 namespace CppUtil
 {
+
+template<typename T, typename U>
+struct Pair
+{
+  T t;
+  U u;
+
+  Pair(T t, U u): t(t), u(u) {};
+};
+
 /**
   * Maps item U to unique key T
   */
@@ -27,6 +37,26 @@ public:
       t.add(item.first);
       u.add(item.second);
     }
+  }
+
+  const size_t size() const
+  {
+    return t.getCount();
+  }
+
+  const Pair<T, U> idx(const size_t idx) const
+  {
+    if (idx > this->size())
+      throw "Cannot acces map out of bounds!";
+    return Pair(this->t[idx], this->u[idx]);
+  }
+
+  const bool has(const T& key) const
+  {
+    for (int i = 0; i < t.getCount(); i++)
+      if (t[i] == key)
+        return true;
+    return false;
   }
 
   /**
@@ -54,7 +84,7 @@ public:
     * 
     * @throws not_found
     */
-  U& tryGetItem(const T& key)
+  U& tryGetItem(const T& key) const
   {
     for (size_t i = 0; i < t.getCount(); i++)
     {
@@ -103,4 +133,25 @@ public:
     throw not_found("Cannot remove item of nonexistant key '" + key + "'!");
   }
 };
+
+template<typename T, typename U>
+const bool operator==(const Map<T, U> a, const Map<T, U> b)
+{
+  if (a.size() != b.size())
+    return false;
+  for (int i = 0; i < a.size(); i++)
+  {
+    if (a.idx(i).t != b.idx(i).t || a.idx(i).u != b.idx(i).u)
+      return false;
+  }
+  return true;
+}
+
+template<typename T, typename U>
+const bool operator!=(const Map<T, U> a, const Map<T, U> b)
+{
+  return!(a==b);
+}
+
+
 } // namespace CppUtil
