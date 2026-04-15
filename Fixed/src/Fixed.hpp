@@ -139,26 +139,16 @@ struct has_unsigned_integer_operators<
  * 
  * @tparam T The type to check
  */
-template <typename T> using has_unsigned_integer_operators_v = typename has_unsigned_integer_operators<T>::value;
+template <typename T> static constexpr bool has_unsigned_integer_operators_v = has_unsigned_integer_operators<T>::value;
 
 /**
 * @brief Check wether a given type is unsigned-integer-_like.
 * Checks all operators required for `Fixed` (see `has_unsigned_integer_operators`) and `unsigned_integer_traits` is defined for the type
 * @tparam T The type to check
 */
-template <typename, typename = void> struct is_unsigned_integer_like : std::false_type
+template <typename T> struct is_unsigned_integer_like
 {
-};
-
-/**
- * @brief Check wether a given type is unsigned-integer-_like.
- * Checks all operators required for `Fixed` (see `has_unsigned_integer_operators`) and `unsigned_integer_traits` is defined for the type
- * @tparam T The type to check
- */
-template <typename T>
-struct is_unsigned_integer_like<
-  T, std::enable_if<unsigned_integer_traits<T>::defined && has_unsigned_integer_operators_v<T>::value>> : std::true_type
-{
+  static constexpr bool value = unsigned_integer_traits<T>::defined && has_unsigned_integer_operators_v<T>;
 };
 
 /**

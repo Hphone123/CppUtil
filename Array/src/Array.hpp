@@ -490,12 +490,8 @@ public:
     this->resizeFactor = resizeFactor;
   }
 
-  DynamicArray<T>(const DynamicArray<T>& other) : 
-    arr(other.arr),
-    count(other.count),
-    resizeFactor(other.resizeFactor)
-  {
-  };
+  DynamicArray<T>(const DynamicArray<T>& other) :
+      arr(other.arr), count(other.count), resizeFactor(other.resizeFactor){};
 
   T& operator[](size_t idx)
   {
@@ -759,8 +755,7 @@ template <typename T, typename func> static void foreach (DynamicArray<T> arr, f
   }
 }
 
-template<typename T>
-bool operator==(const DynamicArray<T>& a, const DynamicArray<T>& b)
+template <typename T> bool operator==(const DynamicArray<T>& a, const DynamicArray<T>& b)
 {
   if (a.getCount() != b.getCount())
     return false;
@@ -772,10 +767,9 @@ bool operator==(const DynamicArray<T>& a, const DynamicArray<T>& b)
   return true;
 }
 
-template<typename T>
-bool operator!=(const DynamicArray<T>& a, const DynamicArray<T>& b)
+template <typename T> bool operator!=(const DynamicArray<T>& a, const DynamicArray<T>& b)
 {
-  return !(a==b);
+  return !(a == b);
 }
 
 }; // namespace CppUtil

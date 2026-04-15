@@ -9,13 +9,12 @@
 namespace CppUtil
 {
 
-template<typename T, typename U>
-struct Pair
+template <typename T, typename U> struct Pair
 {
   T t;
   U u;
 
-  Pair(T t, U u): t(t), u(u) {};
+  Pair(T t, U u) : t(t), u(u){};
 };
 
 /**
@@ -134,8 +133,7 @@ public:
   }
 };
 
-template<typename T, typename U>
-const bool operator==(const Map<T, U> a, const Map<T, U> b)
+template <typename T, typename U> const bool operator==(const Map<T, U> a, const Map<T, U> b)
 {
   if (a.size() != b.size())
     return false;
@@ -147,11 +145,9 @@ const bool operator==(const Map<T, U> a, const Map<T, U> b)
   return true;
 }
 
-template<typename T, typename U>
-const bool operator!=(const Map<T, U> a, const Map<T, U> b)
+template <typename T, typename U> const bool operator!=(const Map<T, U> a, const Map<T, U> b)
 {
-  return!(a==b);
+  return !(a == b);
 }
-
 
 } // namespace CppUtil
