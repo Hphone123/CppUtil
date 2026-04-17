@@ -814,7 +814,7 @@ public:
     while (after)
     {
       after *= base;
-      res_after = res_after + (char)('0' + (after / ((base_t)1 << afterDec)));
+      res_after = res_after + String((char)('0' + (after / ((base_t)1 << afterDec))));
       after %= ((base_t)1 << afterDec);
     }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
@@ -19,9 +20,14 @@ protected:
   String(size_t size) : ResizableArray<char>(size){};
 
 public:
-  String() : ResizableArray<char>(1){};
+  String() : ResizableArray<char>(1)
+  {
+    this->arr[0] = '\0';
+  };
 
   String(const char * str) : ResizableArray<char>(str, strlen(str) + 1){};
+
+  String(const char * str, const size_t len) : ResizableArray<char>(str, len){};
 
   String(const char c) : ResizableArray<char>(2)
   {
@@ -30,71 +36,25 @@ public:
 
   String(std::string str) : ResizableArray<char>(str.c_str(), strlen(str.c_str()) + 1){};
 
-  String operator+(const String& other) const
+  String& operator+=(const String& other)
   {
-    String res = String(this->size + other.size - 1);
-    for (size_t i = 0; i < this->size - 1; i++)
+    const size_t size = this->getSize() - 1;
+    this->resize(this->getSize() + other.getSize() - 1);
+    for (size_t i = size; i < this->getSize(); i++)
     {
-      res[i] = this->operator[](i);
+      this->operator[](i) = other[i - size];
     }
-    for (size_t i = 0; i < other.size; i++)
-    {
-      res[i + this->size - 1] = other[i];
-    }
-    res[res.size - 1] = '\0';
-    return res;
+    return *this;
   }
 
-  String operator+(const char c) const
+  String& append(const String& other)
   {
-    String res = String(this->size + 1);
-    for (size_t i = 0; i < this->size - 1; i++)
-    {
-      res[i] = this->operator[](i);
-    }
-    res[res.size - 2] = c;
-    res[res.size - 1] = '\0';
-    return res;
+    return this->operator+=(other);
   }
 
   operator std::string() const
   {
     return std::string(this->arr);
-  }
-
-  bool operator==(const String& other) const
-  {
-    if (this->size != other.getSize())
-      return false;
-    for (size_t i = 0; i < this->size - 1; i++)
-    {
-      if (this->operator[](i) != other[i])
-        return false;
-    }
-    return true;
-  }
-
-  bool operator!=(const String& other) const
-  {
-    return !(this->operator==(other));
-  }
-
-  bool operator==(const char * other) const
-  {
-    if (strlen(other) + 1 != this->size)
-      return false;
-
-    for (size_t i = 0; i < this->size; i++)
-    {
-      if (this->operator[](i) != other[i])
-        return false;
-    }
-    return true;
-  }
-
-  bool operator!=(const char * other) const
-  {
-    return !(this->operator==(other));
   }
 
   size_t length() const
@@ -313,4 +273,106 @@ public:
     }
   }
 };
+
+inline bool operator==(const String& a, const String& b)
+{
+  if (a.getSize() != b.getSize())
+    return false;
+  for (size_t i = 0; i < a.getSize() - 1; i++)
+  {
+    if (a[i] != b[i])
+      return false;
+  }
+  return true;
+}
+
+inline bool operator!=(const String& a, const String& b)
+{
+  return !(a == b);
+}
+
+inline String operator+(String a, const String& b)
+{
+  a += b;
+  return a;
+}
+
+template <uint8_t base = 10> inline String to_string(uint64_t val)
+{
+  static_assert(base <= 36, "Cannot use base > 36!");
+
+  uint64_t tmp = val;
+  String   res = String();
+
+  while (tmp)
+  {
+    if ((tmp % base) > 9)
+      res = String((char)('A' + ((tmp % base) - 10))) + res;
+    else
+      res = String((char)('0' + (tmp % base))) + res;
+    tmp /= base;
+  }
+  return res;
+}
+
+inline String to_string(uint32_t val)
+{
+  return to_string((uint64_t)val);
+}
+
+inline String to_string(uint16_t val)
+{
+  return to_string((uint64_t)val);
+}
+
+inline String to_string(uint8_t val)
+{
+  return to_string((uint64_t)val);
+}
+
+template <uint8_t base = 10> inline String to_string(int64_t val)
+{
+  static_assert(base <= 36, "Cannot use base > 36!");
+
+  uint64_t tmp = val;
+  String   res = String();
+
+  if (val < 0)
+    res = res + "-";
+
+  while (tmp)
+  {
+    if ((tmp % base) > 9)
+      res = String((char)('A' + ((tmp % base) - 10))) + res;
+    else
+      res = String((char)('0' + (tmp % base))) + res;
+    tmp /= base;
+  }
+  return res;
+}
+
+inline String to_string(int32_t val)
+{
+  return to_string((int64_t)val);
+}
+
+inline String to_string(int16_t val)
+{
+  return to_string((int64_t)val);
+}
+
+inline String to_string(int8_t val)
+{
+  return to_string((int64_t)val);
+}
+
+inline String to_string(bool val)
+{
+  return val ? String("true") : String("false");
+}
+
 } // namespace CppUtil
+inline CppUtil::String operator""_str(const char * inp, size_t len)
+{
+  return CppUtil::String(inp);
+}
