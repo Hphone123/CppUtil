@@ -83,7 +83,7 @@ public:
     * 
     * @throws not_found
     */
-  U& tryGetItem(const T& key) const
+  U& tryGetItem(const T& key)
   {
     for (size_t i = 0; i < t.getCount(); i++)
     {

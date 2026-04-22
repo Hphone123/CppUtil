@@ -56,7 +56,7 @@ endif()
 
 add_subdirectory(Async)
 if (RUN_TESTS_AFTER_BUILD)
-	# add_custom_target(RunAsyncTest					ALL COMMENT "Running tests for 'Async'"						DEPENDS AsyncTest						COMMAND ./Async/AsyncTest ${TEST_FAILSAFE})
+	add_custom_target(RunAsyncTest					ALL COMMENT "Running tests for 'Async'"						DEPENDS AsyncTest						COMMAND ./Async/AsyncTest ${TEST_FAILSAFE})
 endif()
 
 add_subdirectory(Iteration)
